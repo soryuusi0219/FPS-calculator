@@ -1,9 +1,13 @@
+import { formatValue } from './calculation/format-value.ts';
+import { diagnosticOf } from './language/source.ts';
 import type { Field } from './core/field.ts';
 import { primeField, rationalField } from './core/field.ts';
 import type { Statement } from './language/parser.ts';
 import { parse } from './language/parser.ts';
 import { Evaluator } from './language/evaluator.ts';
-import { expressionTex, scalarTex, seriesTex, statementTex } from './language/tex.ts';
+import type { Value } from './language/values.ts';
+import { ImplicitWorkbook } from './language/implicit-workbook.ts';
+import { expressionTex, statementTex } from './language/tex.ts';
 import { MAX_ROWS, MAX_TERMS } from './config/limits.ts';
 import type { Calculation, CalculationResult, InputRow, RowResult } from './model/calculation.ts';
 
@@ -25,7 +29,7 @@ export function calculate(input: Calculation): CalculationResult {
 
 function evaluateWorkbook<T>(input: Calculation, field: Field<T>): CalculationResult {
   const parsed = new Map<string, Statement>();
-  const failures = new Map<string, string>();
+  const failures = new Map<string, unknown>();
   const definitions = new Map<string, InputRow[]>();
   for (const row of input.rows) {
     if (!row.source.trim()) continue;
@@ -33,39 +37,34 @@ function evaluateWorkbook<T>(input: Calculation, field: Field<T>): CalculationRe
       const statement = parse(row.source);
       parsed.set(row.id, statement);
       if (statement.name) definitions.set(statement.name, [...(definitions.get(statement.name) ?? []), row]);
-    } catch (error) { failures.set(row.id, message(error)); }
+    } catch (error) { failures.set(row.id, error); }
   }
+  const implicit = new ImplicitWorkbook(field, input, parsed);
   const evaluator = new Evaluator(field, (name) => {
     const rows = definitions.get(name);
     if (!rows) throw new Error(`未定義の変数: ${name}`);
     if (rows.length !== 1) throw new Error(`${name} が複数の行で定義されています。`);
     return parsed.get(rows[0]!.id)!.expression;
-  });
+  }, (name, precision) => implicit.resolve(name, precision));
+  implicit.attach(evaluator);
+
+  function format(common: RowResult, value: Value<T>): RowResult {
+    const metadata = common.name ? implicit.metadata(common.name) : undefined;
+    if (metadata) common = { ...common, solver: metadata };
+    return formatValue(input, field, common, value);
+  }
 
   return {
     rows: input.rows.map((row): RowResult => {
       const statement = parsed.get(row.id);
-      if (failures.has(row.id)) return { id: row.id, name: null, error: failures.get(row.id)! };
+      if (failures.has(row.id)) return { id: row.id, name: null, error: message(failures.get(row.id)), ...(diagnosticOf(failures.get(row.id)) ? { diagnostic: diagnosticOf(failures.get(row.id))! } : {}) };
       if (!statement) return { id: row.id, name: null };
       const common = { id: row.id, name: statement.name, tex: statementTex(statement) };
       try {
         const value = statement.name ? evaluator.symbol(statement.name, input.terms) : evaluator.evaluate(statement.expression, input.terms);
-        if (value.kind === 'scalar') {
-          const formatted = field.format(value.value);
-          return { ...common, valueType: 'scalar', value: formatted, resultTex: scalarTex(formatted) };
-        }
-        if (value.kind === 'boolean') return { ...common, valueType: 'boolean', value: String(value.value), resultTex: `\\mathrm{${value.value}}` };
-        if (value.kind === 'lambda') return { ...common, valueType: 'lambda', value: `ラムダ (${value.parameters.join(', ')})`, resultTex: expressionTex(value) };
-        const startDegree = value.series.startDegree;
-        if (startDegree < 0 && input.basis === 'egf') throw new Error('負の次数を持つLaurent級数はE.G.F.表示に対応していません。O.G.F.表示へ切り替えてください。');
-        if (input.domain === 'prime' && input.basis === 'egf' && BigInt(input.terms) > BigInt(input.modulus)) throw new Error('E.G.F. 表示には項数 N ≤ mod が必要です（階乗の可逆性）。');
-        let factorial = field.one;
-        const coefficients = value.series.coefficients.map((coefficient, n) => {
-          if (n > 0) factorial = field.mul(factorial, field.fromInteger(BigInt(n)));
-          return field.format(input.basis === 'egf' ? field.mul(coefficient, factorial) : coefficient);
-        });
-        return { ...common, valueType: startDegree < 0 ? 'laurent' : 'fps', startDegree, coefficients, resultTex: seriesTex(coefficients, input.basis, startDegree) };
-      } catch (error) { return { ...common, error: message(error) }; }
+        return format(common, value);
+      } catch (error) { return { ...common, error: message(error), ...(diagnosticOf(error) ? { diagnostic: diagnosticOf(error)! } : {}) }; }
     }),
+    ...(input.systems?.length ? { systems: implicit.results(input.terms, (name, value) => format({ id: name, name, tex: expressionTex({ kind: 'symbol', name }) }, value)) } : {}),
   };
 }

@@ -1,14 +1,16 @@
 import type { Calculation, RowResult } from '../model/calculation.ts';
 import { isSeriesResult } from '../model/calculation.ts';
 
-export const valueLabels = { scalar: 'スカラー', fps: 'FPS', laurent: 'Laurent級数', lambda: 'ラムダ', boolean: '真偽値' };
+export const valueLabels = { scalar: 'スカラー', fps: 'FPS', laurent: 'Laurent級数', analysis: '解析', lambda: 'ラムダ', boolean: '真偽値' };
+export const solverLabels: Record<string, string> = { 'differential-coefficient': '微積分・係数逐次法', 'fixed-point': '再帰', coefficient: '係数逐次法', newton: 'Newton法' };
 
 export function rowPreview(result: RowResult | undefined, busy: boolean): string {
   if (busy) return '計算中…';
   if (result?.error) return result.error;
+  if (result?.analysis) return result.analysis.title;
   if (isSeriesResult(result)) {
     const label = result.valueType === 'laurent' ? `Laurent (次数${result.startDegree}〜)` : 'FPS';
-    return `${label} [${result.coefficients.slice(0, 5).join(', ')}${result.coefficients.length > 5 ? ', …' : ''}]`;
+    return `${label} [${result.coefficients.slice(0, 5).join(', ')}${result.coefficients.length > 5 ? ', …' : ''}]${result.solver ? ` · ${solverLabels[result.solver.method] ?? result.solver.method}` : ''}`;
   }
   if (result?.value !== undefined) return `${result.valueType === 'scalar' ? 'スカラー: ' : ''}${result.value}`;
   return '式を入力してください';

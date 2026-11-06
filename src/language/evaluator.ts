@@ -3,17 +3,15 @@ import { exactRoot, rational, rationalField } from '../core/field.ts';
 import { combinatorial, factorial } from '../core/combinatorics.ts';
 import { Series } from '../core/series.ts';
 import { LaurentSeries } from '../core/laurent.ts';
+import { catalanSeries, lambertW } from '../core/special-series.ts';
 import { MAX_COEFFICIENT_INDEX, MAX_EVALUATION_DEPTH, MAX_EVALUATION_STEPS, MAX_INTEGER_EXPONENT, MAX_INTERNAL_PRECISION, MAX_POLE_ORDER, MAX_SCALAR_BITS, MIN_COEFFICIENT_INDEX } from '../config/limits.ts';
 import type { Expression } from './parser.ts';
-import { builtinDefinition } from './builtins.ts';
-
-interface Scalar<T> {
-  kind: 'scalar'; value: T; exact: Rational;
-  coefficient?: (index: number) => Scalar<T>;
-}
-interface Lambda<T> { kind: 'lambda'; parameters: string[]; body: Expression; scope: Scope<T> }
-export type Value<T> = Scalar<T> | { kind: 'fps'; series: LaurentSeries<T> } | Lambda<T> | { kind: 'boolean'; value: boolean };
-type Scope<T> = ReadonlyMap<string, Value<T>>;
+import { SourceError } from './source.ts';
+import { expressionRange } from './expression-range.ts';
+import type { Lambda, Scalar, Scope, Value } from './values.ts';
+export type { Value } from './values.ts';
+import { sequenceBuiltin, sequenceFunctionNames } from './sequence-functions.ts';
+import { builtinDefinition, validateBuiltinArity } from './builtins.ts';
 
 /** 型付きの値と要求精度。添字・指数にはmodで還元する前の厳密値を使う。 */
 export class Evaluator<T> {
@@ -23,8 +21,9 @@ export class Evaluator<T> {
   private readonly visiting: string[] = [];
   private steps = 0;
   private depth = 0;
+  private readonly resolveImplicit: ((name: string, precision: number) => Value<T> | undefined) | undefined;
 
-  constructor(field: Field<T>, lookup: (name: string) => Expression) { this.field = field; this.lookup = lookup; }
+  constructor(field: Field<T>, lookup: (name: string) => Expression, resolveImplicit?: (name: string, precision: number) => Value<T> | undefined) { this.field = field; this.lookup = lookup; this.resolveImplicit = resolveImplicit; }
 
   private scalar(exact: Rational, value?: T): Scalar<T> {
     if (exact.numerator.toString(2).length + exact.denominator.toString(2).length > MAX_SCALAR_BITS) throw new Error(`スカラー値のサイズが上限${MAX_SCALAR_BITS} bitを超えました。`);
@@ -54,10 +53,17 @@ export class Evaluator<T> {
   symbol(name: string, precision: number): Value<T> {
     if (name === 'x' || name === 'X') return { kind: 'fps', series: new LaurentSeries(this.field, Array.from({ length: precision }, (_, i) => i === 1 ? this.field.one : this.field.zero)) };
     if (name === 'true' || name === 'false') return { kind: 'boolean', value: name === 'true' };
-    if (this.visiting.includes(name)) throw new Error(`循環参照: ${[...this.visiting, name].join(' → ')}。暗黙方程式の求解は今後対応予定です。`);
+    const implicit = this.resolveImplicit?.(name, precision);
+    if (implicit) return implicit;
+    if (this.visiting.includes(name)) throw new Error(`循環参照: ${[...this.visiting, name].join(' → ')}。この呼出しを含む循環は対応する正則系として解析できません。`);
     const key = `${name}:${precision}`;
     const cached = this.memo.get(key);
     if (cached) return cached;
+    if (name === 'Catalan') {
+      const value: Value<T> = { kind: 'fps', series: new LaurentSeries(this.field, catalanSeries(this.field, precision).coefficients) };
+      this.memo.set(key, value);
+      return value;
+    }
     const expression = this.lookup(name);
     this.visiting.push(name);
     try {
@@ -72,6 +78,12 @@ export class Evaluator<T> {
     if (++this.steps > MAX_EVALUATION_STEPS) throw new Error('式の評価回数が上限を超えました。');
     if (++this.depth > MAX_EVALUATION_DEPTH) { this.depth--; throw new Error('式やラムダ呼出しの入れ子が深すぎます。'); }
     try { return this.evaluateNode(node, precision, scope); }
+    catch (error) {
+      const span = expressionRange(node);
+      // 別の定義やラムダ内の位置を参照元の入力へ持ち出さない。
+      if (!span || error instanceof SourceError && node.kind !== 'symbol' && node.kind !== 'call') throw error;
+      throw new SourceError(error instanceof Error ? error.message : String(error), span.start, span.end);
+    }
     finally { this.depth--; }
   }
 
@@ -103,7 +115,8 @@ export class Evaluator<T> {
           const difference = a.numerator * b.denominator - b.numerator * a.denominator;
           return { kind: 'boolean', value: operator === '<' ? difference < 0n : operator === '<=' ? difference <= 0n : operator === '>' ? difference > 0n : operator === '>=' ? difference >= 0n : operator === '==' ? difference === 0n : difference !== 0n };
         }
-        if (operator === 'C' || operator === 'P' || operator === 'H') return this.integer(combinatorial(operator, this.exactInteger(left), this.exactInteger(right)));
+        const combination = builtinDefinition(operator)?.combinatorial;
+        if (combination) return this.integer(combinatorial(combination, this.exactInteger(left), this.exactInteger(right)));
         if (operator === '%') {
           const divisor = this.exactInteger(right);
           if (divisor === 0n) throw new Error('0 による剰余は定義されません。');
@@ -136,6 +149,11 @@ export class Evaluator<T> {
   }
 
   private index(target: Expression, index: bigint, scope: Scope<T>): Scalar<T> {
+    const local = target.kind === 'symbol' ? scope.get(target.name) : undefined;
+    if (local?.kind === 'history' || local?.kind === 'scalar' && local.coefficient) {
+      if (index < BigInt(-MAX_INTERNAL_PRECISION) || index >= BigInt(MAX_INTERNAL_PRECISION)) throw new Error('係数参照の内部上限を超えました。');
+      return local.coefficient!(Number(index));
+    }
     if (index < BigInt(MIN_COEFFICIENT_INDEX) || index > BigInt(MAX_COEFFICIENT_INDEX)) throw new Error(`係数の添字は ${MIN_COEFFICIENT_INDEX}〜${MAX_COEFFICIENT_INDEX} の整数に制限しています。`);
     const value = this.evaluate(target, Number(index < 0n ? 1n : index + 1n), scope);
     if (value.kind === 'scalar' && value.coefficient) return value.coefficient(Number(index));
@@ -244,7 +262,12 @@ export class Evaluator<T> {
 
   private callBuiltin(name: string, args: Expression[], precision: number, scope: Scope<T>): Value<T> {
     const definition = builtinDefinition(name)!;
-    if (args.length !== definition.arity) throw new Error(`${name} には ${definition.arity} 個の引数が必要です。`);
+    validateBuiltinArity(name, args.length);
+    if (sequenceFunctionNames.has(name)) return sequenceBuiltin({
+      field: this.field, evaluate: (node,n) => this.evaluate(node,n,scope),
+      integer: value => this.exactInteger(value), scalar: value => this.fromCoefficient(value), index: n => this.integer(BigInt(n)),
+      invoke: (lambda,values,n) => this.invoke(lambda,values,n), lookup: name => this.lookup(name),
+    },name,args,precision);
     const arg = args[0]!;
     const ev = (node: Expression, requested = precision) => this.evaluate(node, requested, scope);
     if (name === 'if') return ev(this.condition(ev(arg)) ? args[1]! : args[2]!);
@@ -274,6 +297,15 @@ export class Evaluator<T> {
       return { kind: 'fps', series: this.series(ev(arg, requested), requested, false).revert().truncate(precision) };
     }
     const value = ev(arg);
+    if (name === 'Catalan' || name === 'LambertW') {
+      if (value.kind === 'scalar') {
+        if (!this.field.equal(value.value, this.field.zero)) throw new Error(`${name} のスカラー引数は0の場合のみ対応しています。`);
+        return this.integer(name === 'Catalan' ? 1n : 0n);
+      }
+      const input = this.series(value, precision, false).asPowerSeries();
+      const series = name === 'Catalan' ? catalanSeries(this.field, precision).compose(input) : lambertW(input);
+      return { kind: 'fps', series: new LaurentSeries(this.field, series.coefficients) };
+    }
     if (name === 'compose') return { kind: 'fps', series: this.series(value, precision, false).compose(this.series(ev(args[1]!), precision, false)) };
     if (value.kind === 'scalar') {
       if (name === 'exp' && this.field.equal(value.value, this.field.zero)) return this.integer(1n);

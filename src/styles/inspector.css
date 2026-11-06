@@ -49,3 +49,9 @@ tbody tr:nth-child(even) { background: #fafbf8; }
 .recipes code { display: block; font-size: 10px; color: #5c7252; overflow-wrap: anywhere; }
 footer { border-top: 1px solid #e1e6dc; margin-top: 37px; padding-top: 17px; font-size: 9px; color: #8a967f; }
 footer span { float: right; font-family: var(--mono); }
+.analysis-output { padding: 22px; font-size: 12px; line-height: 1.9; overflow-wrap: anywhere; }
+.analysis-output h3 { font-size: 14px; margin: 0 0 12px; }
+.analysis-output p { white-space: pre-wrap; font-family: var(--mono); }
+.repository-link { color: #c1d4c9; font-size: 12px; text-decoration: none; white-space: nowrap; }
+.repository-link:hover { color: white; text-decoration: underline; }
+.analysis-math { max-width: 100%; overflow-x: auto; padding: 8px 0; }

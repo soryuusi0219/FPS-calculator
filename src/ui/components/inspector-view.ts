@@ -6,7 +6,7 @@ import { query } from '../dom.ts';
 import { renderMath } from '../math.ts';
 import { bindCopyButton } from '../clipboard.ts';
 import { basisNote, resultCopyText, texCopyText, valueLabels } from '../result-format.ts';
-import { coefficientTable } from './coefficient-table.ts';
+import { ResultBodyView } from './result-body-view.ts';
 
 export interface InspectorProps {
   input: Calculation;
@@ -23,6 +23,7 @@ interface InspectorActions {
 
 export class InspectorView {
   private readonly host: HTMLElement;
+  private readonly body: ResultBodyView;
   private props: InspectorProps | undefined;
   private readonly copy: HTMLButtonElement;
   private readonly copyTex: HTMLButtonElement;
@@ -39,9 +40,10 @@ export class InspectorView {
       </div>
       <details class="tex-source"><summary>TeXソース</summary><pre id="tex-source"></pre></details>
       <div class="reference-note"><span class="note-icon">i</span><p id="basis-note"></p></div>
-      <section class="recipes" aria-label="式のサンプル"><p class="eyebrow">TRY AN EXPRESSION</p><div><button data-example="sqrt(1+x)"><span>平方根</span><code>sqrt(1+x)</code></button><button data-example="fps(n =&gt; C(2*n,n))"><span>ラムダでFPSを宣言</span><code>fps(n =&gt; C(2*n,n))</code></button><button data-example="map(1/(1-x), (a,i) =&gt; (i+1)!*a^2)"><span>階乗と係数写像</span><code>map(f, (a,i) =&gt; (i+1)!*a^2)</code></button></div></section>
+      <section class="recipes" aria-label="式のサンプル"><p class="eyebrow">TRY AN EXPRESSION</p><div><button data-example="sqrt(1+x)"><span>平方根</span><code>sqrt(1+x)</code></button><button data-example="fps(n =&gt; nCk(2*n,n))"><span>ラムダでFPSを宣言</span><code>fps(n =&gt; nCk(2*n,n))</code></button><button data-example="map(1/(1-x), (a,i) =&gt; (i+1)!*a^2)"><span>階乗と係数写像</span><code>map(f, (a,i) =&gt; (i+1)!*a^2)</code></button></div></section>
       <footer>厳密計算 · ブラウザ内で実行 <span>ℚ[[x]] / 𝔽p[[x]]</span></footer>
     `;
+    this.body = new ResultBodyView(query(host, '#result-body'), actions.add);
     this.copy = query(host, '#copy');
     this.copyTex = query(host, '#copy-tex');
     for (const basis of ['ogf', 'egf'] as const) query<HTMLButtonElement>(host, `#${basis}`).onclick = () => actions.basis(basis);
@@ -78,24 +80,6 @@ export class InspectorView {
     this.copy.disabled = busy || Boolean(error) || resultCopyText(result) === undefined;
     this.copy.textContent = this.copyLabel();
     this.copyTex.disabled = busy || !result?.tex;
-    this.renderBody(props);
-  }
-  private renderBody({ input, result, calculation, presentation }: InspectorProps): void {
-    const body = query<HTMLElement>(this.host, '#result-body');
-    const error = calculation.error ?? result?.error;
-    if (calculation.busy || error || (!result?.coefficients && result?.value === undefined)) {
-      const notice = document.createElement('div');
-      notice.className = `result-notice${error && !calculation.busy ? ' error' : ''}`;
-      notice.textContent = calculation.busy ? '係数を計算しています…' : error ?? '計算したい式を入力すると、ここに係数が表示されます。';
-      body.replaceChildren(notice);
-    } else if (isSeriesResult(result) && presentation === 'table') {
-      body.replaceChildren(coefficientTable(result, input));
-    } else {
-      const output = document.createElement('div');
-      output.className = isSeriesResult(result) ? 'series-output' : 'scalar-output';
-      output.setAttribute('aria-label', isSeriesResult(result) ? '横向きの級数表示' : result.valueType ? valueLabels[result.valueType] : '計算結果');
-      renderMath(result.resultTex ?? '', output);
-      body.replaceChildren(output);
-    }
+    this.body.render({ input, result, busy, error, presentation });
   }
 }

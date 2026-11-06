@@ -1,0 +1,28 @@
+.code-editor { position: relative; min-width: 0; max-width: 100%; }
+.code-overlay { position: absolute; margin: 0; box-sizing: border-box; overflow: hidden; pointer-events: none; white-space: pre; color: #243b30; border: 0; z-index: 0; text-align: left; tab-size: 8; }
+.code-editor .code-input { position: relative; z-index: 1; color: transparent; caret-color: #243b30; background: transparent; }
+.code-input::selection { background: #a0cdbc66; color: transparent; }
+.code-composing .code-input { color: #243b30; }
+.code-composing .code-overlay { visibility: hidden; }
+.code-integer { color: #986224; }
+.code-function { color: #3569a0; }
+.code-operator { color: #6a647b; }
+.code-invalid, .code-unmatched { color: #ac342b; background: #ffe0dc; }
+.code-match { background: #c7e7d9; outline: 1px solid #79aa93; border-radius: 2px; }
+.code-error { text-decoration: underline wavy #b43e33; text-underline-offset: 3px; }
+.code-diagnostic { display: block; max-width: 100%; padding: 3px 0; border: 0; background: transparent; color: #ad352d; text-align: left; font-size: 11px; overflow-wrap: anywhere; cursor: pointer; }
+.code-completions { position: fixed; z-index: 1000; width: 260px; max-width: calc(100vw - 16px); max-height: 230px; overflow: auto; padding: 4px; background: #fff; border: 1px solid #cbd8d0; border-radius: 7px; box-shadow: 0 6px 22px #203c3026; }
+.code-completions button { display: block; width: 100%; border: 0; padding: 6px 8px; background: transparent; text-align: left; font-family: monospace; cursor: pointer; }
+.code-completions button[aria-selected="true"] { background: #e0eee6; }
+#notebook-documents { margin: 0 26px; }
+.notebook-document-tools, .template-library { margin: 12px 0; font-size: 12px; }
+.notebook-document-tools summary, .template-library summary { cursor: pointer; color: #4b6456; }
+.document-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.rename-fields, .template-filters { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; margin: 10px 0; }
+#notebook-documents label { display: grid; gap: 5px; min-width: 0; }
+#notebook-documents input, #notebook-documents select, #notebook-documents textarea { width: 100%; min-width: 0; box-sizing: border-box; padding: 7px; border: 1px solid #cbd8d0; border-radius: 5px; }
+#notebook-documents p, #template-list { font-size: 11px; color: #64756a; line-height: 1.6; }
+#document-status.error { color: #ad352d; }
+#template-list { margin: 10px 0; }
+.template-entry { display: block; width: 100%; text-align: left; padding: 8px; margin: 4px 0; }
+#template-preview { resize: vertical; font-family: monospace; }
