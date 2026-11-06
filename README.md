@@ -47,6 +47,10 @@ Vite内で `SyntaxError: Unexpected token '.'` が出る場合は、古いNode.j
 
 `.github/workflows/deploy.yml` を含む変更を `main` にマージすると、テストと型検査・ビルドに成功した後、`dist/` をGitHub Pagesへ公開します。公開先は https://soryuusi0219.github.io/FPS-calculator/ です。以降は `main` の更新で自動公開し、Actionsの **Deploy to GitHub Pages → Run workflow** から `main` を選んで再公開もできます。手動実行でも `main` 以外のブランチは公開しません。
 
+Pages用アーティファクトは `github-pages-<run_id>-<run_attempt>` という実行回ごとの名前で保存します。ビルドと公開を別ジョブにし、公開側は成功済みビルドの名前・IDを受け取り、APIで取得できることを5秒間隔・最大12回確認してから公開します。公開ジョブだけを再実行するときも、ビルド側の出力を使うため名前がずれません。
+
+旧ワークフローで `Multiple artifacts named "github-pages"` が出た実行を再実行しても、新しい設定には切り替わりません。この修正をmainへ反映した後、**Run workflow**でmainから新しい実行を開始してください。同名アーティファクトの重複が原因であり、`punycode`の非推奨警告とは別のエラーです。
+
 ビルド時に `--base=/FPS-calculator/` を渡し、JavaScript・Worker・CSS・KaTeXフォントを配信先のサブパスから読み込みます。リポジトリ名や公開先を変更する場合は、この指定も変更してください。ローカルでは次のコマンドで同じ構成を確認できます。
 
 ```sh

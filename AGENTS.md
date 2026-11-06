@@ -12,7 +12,7 @@
 
 undo/redoは式の編集・行操作・計算設定を対象に実装済み。`app/edit-history.ts` が100操作の上限・1秒未満の連続編集集約・redoの分岐を管理し、controllerがNotebookModelと入力位置のスナップショットを記録・復元する。履歴はタブ内のみで保持し、復元した内容は既存形式で保存する。ボタンとCtrl/Meta+Z・Shift+Z・Ctrl+Yに対応する。
 
-GitHub Pages公開用の `.github/workflows/deploy.yml` は `main` のpush・手動実行を対象に、テストと型検査・ビルド成功後の `dist/` を配信する。手動実行も `main` に限定する。初回のPages設定と再公開手順はREADMEを参照する。配信先のサブパス `/FPS-calculator/` をビルド引数で指定し、通常のローカル開発設定は維持する。公開設定を変える場合は、サブパスからJS・Worker・CSS・KaTeXフォントを読み込めることを確認し、生成物はコミットしない。
+GitHub Pages公開用の `.github/workflows/deploy.yml` は `main` のpush・手動実行を対象に、テストと型検査・ビルド成功後の `dist/` を配信する。手動実行も `main` に限定する。初回のPages設定と再公開手順はREADMEを参照する。Pages用artifactの名前はrun_idとrun_attemptを含め、buildの出力として名前とIDをdeployへ渡す。deployだけの再実行で現在のrun_attemptから名前を再計算しない。取得可能になるまで上限付きで確認し、異なるIDや複数候補を黙って選ばない。配信先のサブパス `/FPS-calculator/` をビルド引数で指定し、通常のローカル開発設定は維持する。公開設定を変える場合は、サブパスからJS・Worker・CSS・KaTeXフォントを読み込めることを確認し、生成物はコミットしない。
 
 循環系は自由変数・ラムダ展開・SCC解析の後に解く。通常行のinitial、明示グループのsystemsに定数項と等式を保持する。代数系の定数項は一意な線形条件だけ自動推定し、F(0,c)=0とJacobianの可逆性を検証する。微積分系は下記の係数方向ADへ分離する。特異な系を解なしと断定しない。4グループ・結合後も未知数8個・各欄4096文字・式512文字の制限を共有する。
 
