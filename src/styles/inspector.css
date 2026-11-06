@@ -1,0 +1,51 @@
+.inspector { min-width: 0; padding: 35px clamp(24px, 4.8vw, 80px) 22px; max-width: 1250px; width: 100%; margin: 0 auto; }
+.inspector-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 31px; }
+.inspector-top .eyebrow { margin: 0; }
+.status { color: #67815f; font-size: 10px; display: flex; gap: 7px; align-items: center; }
+.status::before { content: ''; width: 5px; height: 5px; background: #82a66c; border-radius: 50%; }
+.status.has-error { color: #ad593e; }
+.status.has-error::before { background: #ad593e; }
+.result-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.copy-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.value-type { display: inline-block; font-size: 10px; vertical-align: middle; color: var(--green); background: #e7efe1; padding: 4px 7px; border-radius: 4px; letter-spacing: 0; }
+.value-type:empty { display: none; }
+.expression-math { overflow-x: auto; padding: 0 0 22px; font-size: 15px; }
+.expression-math:empty { display: none; }
+.series-output, .scalar-output { padding: 34px 25px; font-size: 18px; overflow-x: auto; min-height: 115px; }
+.scalar-output { font-size: 24px; }
+.tex-source { color: #7b8974; font-size: 10px; margin-top: 16px; }
+.tex-source summary { cursor: pointer; }
+.tex-source pre { font: 11px/1.8 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: #edf1e8; border-radius: 5px; }
+.katex-display { margin: 0; }
+.series-output > .katex, .expression-math > .katex { display: inline-block; white-space: nowrap; }
+#result-subtitle { font: 12px/1.8 var(--mono); color: #7c8977; margin: 0; overflow-wrap: anywhere; }
+.secondary-button { flex-shrink: 0; border: 1px solid #d5ddcf; border-radius: 5px; padding: 9px 13px; background: #fff; font-size: 11px; color: #536a4e; }
+.result-card { background: #fff; border: 1px solid #dce3d5; border-radius: 9px; overflow: hidden; box-shadow: 0 4px 16px #24382104; }
+.result-toolbar { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+.result-toolbar { flex-wrap: wrap; }
+.basis-toggle { display: flex; padding: 3px; border-radius: 5px; background: #f0f2ec; }
+.basis-toggle button { border: 0; background: transparent; padding: 6px 13px; color: #87917f; font: 10px var(--mono); border-radius: 3px; }
+.basis-toggle button.active { background: #fff; color: #315938; box-shadow: 0 1px 4px #0000000a; }
+#basis-description { font: 12px Georgia, serif; color: #7e8c73; }
+#result-body { overflow-x: auto; max-height: 530px; }
+table { border-collapse: collapse; text-align: left; width: 100%; font: 13px var(--mono); }
+caption { text-align: left; padding: 16px 24px 8px; color: #829078; font: 10px 'Noto Sans JP', sans-serif; }
+thead th { background: #fff; color: #7b8974; font-size: 10px; font-weight: 400; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+thead th:first-child { width: 130px; }
+tbody th { color: #98a18f; font-size: 11px; font-weight: 400; }
+tbody th, td { padding: 10px 24px; border-bottom: 1px solid #f0f2ed; }
+tbody tr:last-child > * { border-bottom: 0; }
+td { color: #344e32; overflow-wrap: anywhere; min-width: 160px; }
+tbody tr:nth-child(even) { background: #fafbf8; }
+.result-notice { padding: 50px 26px; color: #7a8773; font-size: 13px; line-height: 1.9; }
+.error { color: #ad593e !important; }
+.reference-note { display: flex; gap: 10px; margin: 20px 0 34px; }
+.note-icon { width: 15px; height: 15px; border-radius: 50%; border: 1px solid #9baa90; color: #8d9b81; font: 10px/13px Georgia, serif; text-align: center; flex-shrink: 0; margin-top: 1px; }
+.reference-note p { margin: 0; font-size: 10px; line-height: 1.9; color: #849079; }
+.recipes > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 15px; }
+.recipes button { text-align: left; border: 1px solid #dce3d5; border-radius: 6px; padding: 13px 14px; background: transparent; min-width: 0; }
+.recipes button:hover { background: #ecf1e7; }
+.recipes span { display: block; font-size: 10px; margin-bottom: 8px; color: #6b7b60; }
+.recipes code { display: block; font-size: 10px; color: #5c7252; overflow-wrap: anywhere; }
+footer { border-top: 1px solid #e1e6dc; margin-top: 37px; padding-top: 17px; font-size: 9px; color: #8a967f; }
+footer span { float: right; font-family: var(--mono); }

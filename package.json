@@ -1,0 +1,24 @@
+{
+  "name": "fps-calculator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node scripts/run.cjs dev",
+    "check": "node scripts/run.cjs check",
+    "test": "node scripts/run.cjs test",
+    "build": "node scripts/run.cjs build",
+    "preview": "node scripts/run.cjs preview"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "~7.0.2",
+    "vite": "~8.3.6"
+  },
+  "dependencies": {
+    "katex": "^0.19.1"
+  }
+}
