@@ -162,6 +162,8 @@ Laurentは `exp(x)/x` と `x^(-2)*exp(x)` の最高表示次数、正負両方�
 
 依存は `package-lock.json` に固定し、CIは `npm ci` → 型検査 → テスト → ビルドを行う。生成物・依存・秘密情報は `.gitignore` で除外する。依存追加は計算の正しさや編集体験に必要なものに絞る。
 
+GitHub Pagesへの公開は `.github/workflows/deploy.yml` が担当する。`main` のpushまたは `main` を選んだ手動実行で、`npm ci` → テスト → 型検査を含むビルド → Pages用artifactのアップロード → 公開を順に行う。Viteのビルド引数 `--base=/FPS-calculator/` でWorker・CSS・フォントを含むアセットの配信先を揃え、`dist/` はGit管理せずActionsで受け渡す。公開先の変更時はREADMEとビルド引数を更新する。
+
 参照: [形式冪級数の基礎（Sambale）](https://benjaminsambale.github.io/pdfs/fopose.pdf)、[合成逆関数のアルゴリズム（Johansson）](https://arxiv.org/abs/1108.4772)、[Vite公式](https://vite.dev/guide/)、[TypeScript BigInt](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#bigint)、[KaTeX API](https://katex.org/docs/api)、[KaTeXの描画設定](https://katex.org/docs/options)。
 
 Laurentの表現・位数・相対精度: [SageMath Laurent series reference](https://doc.sagemath.org/html/en/reference/power_series/sage/rings/laurent_series_ring_element.html)。

@@ -8,6 +8,8 @@
 
 入力パネルの幅調整・式入力の横スクロール・マウス/タッチ/キーでの行の並べ替えは `src/ui/interactions/`、行のDOM保持は `src/ui/components/expression-list.ts` に実装済み。幅と行順をブラウザに保存する。
 
+GitHub Pages公開用の `.github/workflows/deploy.yml` は `main` のpush・手動実行を対象に、テストと型検査・ビルド成功後の `dist/` を配信する。手動実行も `main` に限定する。初回のPages設定と再公開手順はREADMEを参照する。配信先のサブパス `/FPS-calculator/` をビルド引数で指定し、通常のローカル開発設定は維持する。公開設定を変える場合は、サブパスからJS・Worker・CSS・KaTeXフォントを読み込めることを確認し、生成物はコミットしない。
+
 ## 構成と責務
 
 - `src/main.ts` はスタイル読込と起動のみ。操作の連携は `app/controller.ts` が担当する。
