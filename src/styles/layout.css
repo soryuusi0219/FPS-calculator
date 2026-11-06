@@ -1,0 +1,12 @@
+.app-header { height: 80px; padding: 0 36px; display: flex; align-items: center; gap: 38px; background: #182c26; color: #f3f5ee; }
+.brand { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 19px; letter-spacing: -.6px; }
+.brand strong { font-weight: 400; color: #d0dcd4; }
+.brand-symbol { font-family: Georgia, serif; font-style: italic; font-size: 34px; color: #c9df8a; }
+.header-caption { color: #aabbb1; font-size: 12px; letter-spacing: .08em; }
+.version { margin-left: auto; font: 10px var(--mono); letter-spacing: .1em; color: #becdbf; border: 1px solid #4b5e51; border-radius: 5px; padding: 7px 10px; }
+.workspace { display: grid; grid-template-columns: minmax(0, var(--notebook-width, 385px)) 8px minmax(0, 1fr); min-height: calc(100vh - 80px); }
+.notebook-resizer { position: relative; cursor: col-resize; touch-action: none; background: #f0f3ed; }
+.notebook-resizer::after { content: ''; position: absolute; inset: 0 3px; background: #dfe6d9; transition: background .15s; }
+.notebook-resizer:hover::after, .notebook-resizer:focus-visible::after, .notebook-resizing .notebook-resizer::after { background: var(--green); }
+.notebook-resizer:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.notebook-resizing, .notebook-resizing * { cursor: col-resize !important; user-select: none; }
