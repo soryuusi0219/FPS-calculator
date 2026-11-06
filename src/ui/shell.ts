@@ -5,6 +5,7 @@ export function createShell(root: HTMLElement) {
   <header class="app-header">
     <a class="brand" href="./" aria-label="FPS calculator ホーム"><span class="brand-symbol">ƒ</span><span>FPS <strong>calculator</strong></span></a>
     <span class="header-caption">形式冪級数を、手元で確かめる。</span>
+    <a class="repository-link" href="https://github.com/soryuusi0219/FPS-calculator" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">GitHub ↗</a>
     <span class="version">LOCAL · v0.1</span>
   </header>
   <main id="workspace" class="workspace">

@@ -83,6 +83,42 @@ test('最後の行の削除は空行を残し、行数上限を越えて追加�
   assert.equal(input.rows.length, MAX_ROWS);
 });
 
+test('複製した式は元の直後に別IDで挿入され、選択・独立した編集・保存復元ができる', () => {
+  const id = ids();
+  const session = defaultSession(id);
+  const model = new NotebookModel(session.input, id);
+  const original = model.input.rows[0]!;
+  model.move(original.id, 2);
+  const copy = model.duplicate(original.id)!;
+  assert.notEqual(copy.id, original.id);
+  assert.equal(copy.source, original.source);
+  assert.equal(model.input.rows[3], copy);
+  assert.equal(model.selectedId, copy.id);
+  model.updateSource(copy.id, 'F=2X');
+  assert.equal(original.source, 'f = 1/(1-x)');
+  const storage = new MemoryStorage();
+  assert.equal(saveSession(storage, session), true);
+  const restored = restoreSession(storage, id).session.input;
+  assert.deepEqual(restored.rows.map((row) => row.source), model.input.rows.map((row) => row.source));
+  assert.equal(new Set(restored.rows.map((row) => row.id)).size, restored.rows.length);
+  model.remove(copy.id);
+  assert.equal(model.input.rows.includes(original), true);
+  assert.equal(model.input.rows.length, 4);
+});
+
+test('複製は存在しないIDや行数上限ではノートと選択を変更しない', () => {
+  const id = ids();
+  const model = new NotebookModel(defaultSession(id).input, id);
+  const original = model.input.rows[0]!;
+  assert.equal(model.duplicate('missing'), undefined);
+  assert.equal(model.selectedId, original.id);
+  while (model.input.rows.length < MAX_ROWS) assert.ok(model.duplicate(original.id));
+  const selected = model.selectedId;
+  assert.equal(model.duplicate(original.id), undefined);
+  assert.equal(model.input.rows.length, MAX_ROWS);
+  assert.equal(model.selectedId, selected);
+});
+
 class FakeWorker implements CalculationWorker {
   onmessage: CalculationWorker['onmessage'] = null;
   onerror: CalculationWorker['onerror'] = null;

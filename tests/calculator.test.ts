@@ -125,7 +125,7 @@ test('操作の定数項・一次項条件を検証する', () => {
 });
 
 test('循環・重複・未定義の名前を行ごとに報告する', () => {
-  for (const rows of [['f = g', 'g = f'], ['f = diff(f)'], ['f = integral(f)']]) {
+  for (const rows of [['f = g', 'g = f'], ['f = diff(f)']]) {
     for (const terms of [1, 6]) assert.match(workbook(rows, { terms }).rows[0]!.error!, /循環参照/);
   }
   assert.match(workbook(['f=1', 'f=2', 'f']).rows[2]!.error!, /複数/);
@@ -135,7 +135,7 @@ test('循環・重複・未定義の名前を行ごとに報告する', () => {
 });
 
 test('不正な構文・引数・予約語を拒否し任意コードを実行しない', () => {
-  for (const source of ['2x', '1.5', '(1+x', 'exp()', 'compose(x)', 'unknown(x)', 'toString(x)', 'x=1', 'n=1', 'exp=2', 'globalThis.alert(1)', 'x;1']) {
+  for (const source of ['2 3', '1.5', '(1+x', 'exp()', 'compose(x)', 'unknown(x)', 'toString(x)', 'x=1', 'n=1', 'exp=2', 'globalThis.alert(1)', 'x;1']) {
     assert.ok(workbook([source]).rows[0]!.error, source);
   }
   assert.equal(scalar('__proto__ = 2'), '2');

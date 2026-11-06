@@ -2,7 +2,7 @@ import type { Expression, Statement } from './parser.ts';
 
 const group = (tex: string) => `\\left(${tex}\\right)`;
 const identifier = (name: string) => name.length === 1 ? name === '_' ? '\\_' : name : `\\mathrm{${name.replaceAll('_', '\\_')}}`;
-const precedences: Record<string, number> = { '||': 1, '&&': 2, '==': 3, '!=': 3, '<': 4, '<=': 4, '>': 4, '>=': 4, '+': 5, '-': 5, '*': 6, '/': 6, '%': 6, C: 7, P: 7, H: 7, '^': 9 };
+const precedences: Record<string, number> = { '||': 1, '&&': 2, '==': 3, '!=': 3, '<': 4, '<=': 4, '>': 4, '>=': 4, '+': 5, '-': 5, '*': 6, '/': 6, '%': 6, nCk: 7, nPk: 7, nHk: 7, '^': 9 };
 function enclose(node: Expression, minimum: number): string {
   const precedence = node.kind === 'binary' ? precedences[node.operator]! : node.kind === 'unary' ? 8 : node.kind === 'lambda' || node.kind === 'conditional' ? 0 : 100;
   const tex = expressionTex(node);
@@ -24,8 +24,8 @@ export function expressionTex(node: Expression): string {
       switch (node.operator) {
         case '/': return `\\frac{${tex(node.left)}}{${tex(node.right)}}`;
         case '^': return `${enclose(node.left, 10)}^{${tex(node.right)}}`;
-        case 'C': return `\\binom{${tex(node.left)}}{${tex(node.right)}}`;
-        case 'P': case 'H': return `{}_{${tex(node.left)}}\\mathrm{${node.operator}}_{${tex(node.right)}}`;
+        case 'nCk': return `\\binom{${tex(node.left)}}{${tex(node.right)}}`;
+        case 'nPk': case 'nHk': return `{}_{${tex(node.left)}}\\mathrm{${node.operator[1]}}_{${tex(node.right)}}`;
         default: {
           const operators: Record<string, string> = { '*': '\\cdot', '%': '\\bmod', '<=': '\\le', '>=': '\\ge', '==': '=', '!=': '\\ne', '&&': '\\land', '||': '\\lor' };
           const precedence = precedences[node.operator]!;
@@ -37,7 +37,9 @@ export function expressionTex(node: Expression): string {
       const name = node.callee.kind === 'symbol' ? node.callee.name : '';
       if (name === 'sqrt' && node.args.length === 1) return `\\sqrt{${tex(node.args[0]!)}}`;
       if (name === 'coeff' && node.args.length === 2) return `\\left[x^{${tex(node.args[1]!)}}\\right]${group(tex(node.args[0]!))}`;
-      if (['C', 'nCk', 'binom'].includes(name) && node.args.length === 2) return `\\binom{${tex(node.args[0]!)}}{${tex(node.args[1]!)}}`;
+      if (['nCk', 'binom'].includes(name) && node.args.length === 2) return `\\binom{${tex(node.args[0]!)}}{${tex(node.args[1]!)}}`;
+      if (['nPk', 'nHk'].includes(name) && node.args.length === 2) return `{}_{${tex(node.args[0]!)}}\\mathrm{${name[1]}}_{${tex(node.args[1]!)}}`;
+      if (name === 'LambertW' && node.args.length === 1) return `W${group(tex(node.args[0]!))}`;
       if (name === 'factorial' && node.args.length === 1) return `${enclose(node.args[0]!, 11)}!`;
       if (name === 'fps' && node.args[0]?.kind === 'lambda' && node.args[0].parameters.length === 1) {
         const lambda = node.args[0]; const n = identifier(lambda.parameters[0]!);

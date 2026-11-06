@@ -1,9 +1,10 @@
-import type { Calculation, CalculationResult, RowResult } from '../model/calculation.ts';
+import type { Calculation, CalculationResult, EquationSystemResult, RowResult } from '../model/calculation.ts';
 
 export interface CalculationSnapshot {
   busy: boolean;
   rows: ReadonlyMap<string, RowResult>;
   error: string | undefined;
+  systems?: readonly EquationSystemResult[];
 }
 export type CalculationWorker = Pick<Worker, 'onmessage' | 'onerror' | 'postMessage' | 'terminate'>;
 interface ClientOptions {
@@ -19,6 +20,7 @@ export class CalculationClient {
   private deadline: ReturnType<typeof setTimeout> | undefined;
   private generation = 0;
   private rows: ReadonlyMap<string, RowResult> = new Map();
+  private systems: EquationSystemResult[] = [];
   private readonly notify: (snapshot: CalculationSnapshot) => void;
   private readonly options: Required<ClientOptions>;
 
@@ -42,14 +44,15 @@ export class CalculationClient {
   request(input: Calculation): void {
     this.cancel();
     const generation = this.generation;
-    this.notify({ busy: true, rows: this.rows, error: undefined });
+    this.notify({ busy: true, rows: this.rows, systems: this.systems, error: undefined });
     this.debounce = setTimeout(() => {
       const finish = (response: CalculationResult) => {
         if (generation !== this.generation) return;
         this.generation++; // 同じWorkerが完了後に送る応答も採用しない。
         this.stopWorker();
         this.rows = new Map(response.rows.map((row) => [row.id, row]));
-        this.notify({ busy: false, rows: this.rows, error: response.error });
+        this.systems = response.systems ?? [];
+        this.notify({ busy: false, rows: this.rows, systems: this.systems, error: response.error });
       };
       try {
         this.worker = this.options.createWorker();
