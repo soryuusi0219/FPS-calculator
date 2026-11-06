@@ -41,6 +41,21 @@ Vite内で `SyntaxError: Unexpected token '.'` が出る場合は、古いNode.j
 
 `dist/` を静的ホスティングすればブラウザだけで動作します。サブパスへの配置では Vite の `base` を配信先に合わせて設定してください。KaTeXと数式用フォントも同梱し、実行時のCDN・外部APIへのアクセスはありません。
 
+## GitHub Pagesへの公開
+
+初回はリポジトリの [Settings → Pages](https://github.com/soryuusi0219/FPS-calculator/settings/pages) で、**Build and deployment → Source** を **GitHub Actions** に設定してください。
+
+`.github/workflows/deploy.yml` を含む変更を `main` にマージすると、テストと型検査・ビルドに成功した後、`dist/` をGitHub Pagesへ公開します。公開先は https://soryuusi0219.github.io/FPS-calculator/ です。以降は `main` の更新で自動公開し、Actionsの **Deploy to GitHub Pages → Run workflow** から `main` を選んで再公開もできます。手動実行でも `main` 以外のブランチは公開しません。
+
+ビルド時に `--base=/FPS-calculator/` を渡し、JavaScript・Worker・CSS・KaTeXフォントを配信先のサブパスから読み込みます。リポジトリ名や公開先を変更する場合は、この指定も変更してください。ローカルでは次のコマンドで同じ構成を確認できます。
+
+```sh
+npm run build -- --base=/FPS-calculator/
+npm run preview -- --base=/FPS-calculator/
+```
+
+ブラウザで `http://127.0.0.1:4173/FPS-calculator/` を開いてください。`dist/` のコミットや手動アップロードは不要です。公開処理の結果とURLはActionsの実行結果で確認できます。
+
 ## 使い方
 
 1行に1つの式、または `名前 = 式` を入力します。別の行の定義は前方参照も可能です。行番号または入力欄を選択すると係数表が切り替わります。Enterで行を追加できます。
