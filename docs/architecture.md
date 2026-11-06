@@ -288,7 +288,7 @@ Laurentは `exp(x)/x` と `x^(-2)*exp(x)` の最高表示次数、正負両方�
 
 式の複製はNotebookModelで新規IDを割り当て、現在の行順で元の直後に挿入・選択する。コントローラが再計算と保存を実行して入力へフォーカスする。式の内容は変更しないため、定義名も複製した場合は既存の重複検出でエラーを示し、利用者が別名へ編集する。複製は30行の上限を守り、上限時は各行の複製ボタンを無効にする。
 
-GitHub Pagesへの公開は `.github/workflows/deploy.yml` が担当する。`main` のpushまたは `main` を選んだ手動実行で、`npm ci` → テスト → 型検査を含むビルド → Pages用artifactのアップロード → 公開を順に行う。Viteのビルド引数 `--base=/FPS-calculator/` でWorker・CSS・フォントを含むアセットの配信先を揃え、`dist/` はGit管理せずActionsで受け渡す。公開先の変更時はREADMEとビルド引数を更新する。
+GitHub Pagesへの公開は `.github/workflows/deploy.yml` が担当する。`main` のpushまたは `main` を選んだ手動実行で、`npm ci` → テスト → 型検査を含むビルド → Pages用artifactのアップロード → 公開を順に行う。Viteのビルド引数 `--base=/FPS-calculator/` でWorker・CSS・フォントを含むアセットの配信先を揃え、`dist/` はGit管理せずActionsで受け渡す。公開先の変更時はREADMEとビルド引数を更新する。ビルドと公開は別ジョブとし、buildが生成した `github-pages-<run_id>-<run_attempt>` の名前・IDをjob outputsで引き渡す。これにより同じworkflow runを再実行しても前回のartifactと衝突せず、deployだけの再実行でも成功済みbuildの出力を利用できる。公開前にactions:read権限で取得を確認し、最大12回・間隔5秒で待つ。候補が複数または期待したIDを確認できない場合は公開せず失敗させる。pages:writeとid-token:writeはdeployジョブだけに付与する。
 
 参照: [形式冪級数の基礎（Sambale）](https://benjaminsambale.github.io/pdfs/fopose.pdf)、[合成逆関数のアルゴリズム（Johansson）](https://arxiv.org/abs/1108.4772)、[Vite公式](https://vite.dev/guide/)、[TypeScript BigInt](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#bigint)、[KaTeX API](https://katex.org/docs/api)、[KaTeXの描画設定](https://katex.org/docs/options)。
 

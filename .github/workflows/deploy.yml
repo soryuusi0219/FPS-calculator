@@ -7,20 +7,22 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      # 再実行でも前回のアップロードと名前が衝突しないようにする。
+      PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+    outputs:
+      # deployだけを再実行する場合も、成功済みbuildの名前とIDを引き継ぐ。
+      artifact_name: ${{ steps.artifact-name.outputs.name }}
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,10 +32,58 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build -- --base=/FPS-calculator/
-      - uses: actions/configure-pages@v5
+      - name: Record artifact name
+        id: artifact-name
+        run: echo "name=$PAGES_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v4
+        id: upload
         with:
+          name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Wait for uploaded artifact
+        uses: actions/github-script@v7
+        env:
+          PAGES_ARTIFACT_NAME: ${{ needs.build.outputs.artifact_name }}
+          PAGES_ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+        with:
+          script: |
+            const name = process.env.PAGES_ARTIFACT_NAME;
+            const id = Number(process.env.PAGES_ARTIFACT_ID);
+            if (!name || !Number.isSafeInteger(id) || id <= 0) {
+              throw new Error('Build did not return a valid Pages artifact name and ID.');
+            }
+            for (let attempt = 0; attempt < 12; attempt++) {
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                ...context.repo, run_id: context.runId, name, per_page: 100
+              });
+              const matches = artifacts.filter(artifact => artifact.name === name && !artifact.expired);
+              if (matches.length > 1) throw new Error(`Multiple Pages artifacts found: ${name}`);
+              if (matches.length === 1 && matches[0].id === id) {
+                core.info(`Pages artifact is available: ${name} (${id})`);
+                return;
+              }
+              if (attempt < 11) {
+                core.info(`Waiting for Pages artifact: ${name}`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+              }
+            }
+            throw new Error(`Pages artifact did not become available: ${name} (${id})`);
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
