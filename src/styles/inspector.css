@@ -27,7 +27,7 @@
 .basis-toggle button { border: 0; background: transparent; padding: 6px 13px; color: #87917f; font: 10px var(--mono); border-radius: 3px; }
 .basis-toggle button.active { background: #fff; color: #315938; box-shadow: 0 1px 4px #0000000a; }
 #basis-description { font: 12px Georgia, serif; color: #7e8c73; }
-#result-body { overflow-x: auto; max-height: 530px; }
+#result-body { overflow-x: auto; }
 table { border-collapse: collapse; text-align: left; width: 100%; font: 13px var(--mono); }
 caption { text-align: left; padding: 16px 24px 8px; color: #829078; font: 10px 'Noto Sans JP', sans-serif; }
 thead th { background: #fff; color: #7b8974; font-size: 10px; font-weight: 400; padding: 12px 24px; border-bottom: 1px solid var(--line); }

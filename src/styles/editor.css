@@ -23,6 +23,7 @@
 #notebook-documents input, #notebook-documents select, #notebook-documents textarea { width: 100%; min-width: 0; box-sizing: border-box; padding: 7px; border: 1px solid #cbd8d0; border-radius: 5px; }
 #notebook-documents p, #template-list { font-size: 11px; color: #64756a; line-height: 1.6; }
 #document-status.error { color: #ad352d; }
-#template-list { margin: 10px 0; }
-.template-entry { display: block; width: 100%; text-align: left; padding: 8px; margin: 4px 0; }
+#template-list { margin: 10px 0; max-height: 280px; overflow: auto; scrollbar-width: thin; }
+.template-entry { display: block; width: 100%; text-align: left; padding: 8px; margin: 4px 0; overflow-wrap: anywhere; }
+.template-entry[aria-pressed="true"] { color: var(--green); border-color: var(--green); background: #f0f5ec; }
 #template-preview { resize: vertical; font-family: monospace; }

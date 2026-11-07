@@ -1,4 +1,4 @@
-import { MAX_EQUATION_GROUPS, MAX_ROWS } from '../config/limits.ts';
+import { MAX_COMMENT_LENGTH, MAX_EQUATION_GROUPS, MAX_ROWS } from '../config/limits.ts';
 import type { Calculation, EquationSystemInput, InputRow } from '../model/calculation.ts';
 
 export type IdFactory = () => string;
@@ -59,6 +59,13 @@ export class NotebookModel {
     if (initial) row.initial = initial; else delete row.initial;
     return true;
   }
+  updateComment(id: string, comment: string): boolean {
+    if(comment.length>MAX_COMMENT_LENGTH)throw new Error(`コメントは${MAX_COMMENT_LENGTH}文字までです。`);
+    const row=this.input.rows.find(row=>row.id===id);
+    if(!row||(row.comment??'')===comment)return false;
+    if(comment)row.comment=comment;else delete row.comment;
+    return true;
+  }
   addSystem(): EquationSystemInput | undefined {
     if ((this.input.systems?.length ?? 0) >= MAX_EQUATION_GROUPS) return;
     const used = new Set([...this.input.rows.map((row) => /^\s*([A-Za-z_][A-Za-z_0-9]*)\s*=/.exec(row.source)?.[1]), ...(this.input.systems ?? []).flatMap((system) => [...system.variables.matchAll(/^\s*([A-Za-z_][A-Za-z_0-9]*)/gm)].map((match) => match[1]))]);
@@ -90,6 +97,7 @@ export class NotebookModel {
     if (index < 0 || this.input.rows.length >= MAX_ROWS) return;
     const row = newRow(this.input.rows[index]!.source, this.id);
     if (this.input.rows[index]!.initial !== undefined) row.initial = this.input.rows[index]!.initial!;
+    if (this.input.rows[index]!.comment !== undefined) row.comment = this.input.rows[index]!.comment!;
     this.input.rows.splice(index + 1, 0, row);
     this.selectedId = row.id;
     return row;

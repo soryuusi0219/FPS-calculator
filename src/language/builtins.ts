@@ -1,11 +1,27 @@
+import type { AnalyticFunction } from '../core/analytic-coefficients.ts';
 export type CombinatorialKind = 'C' | 'P' | 'H' | 's1' | 's2';
-interface BuiltinDefinition { arity: number; minArity?: number; maxArity?: number; combinatorial?: CombinatorialKind }
+interface BuiltinDefinition { arity: number; minArity?: number; maxArity?: number; combinatorial?: CombinatorialKind; analytic?: AnalyticFunction }
 
 /** 予約語・引数数・組合せ関数の別名を一か所で定義する。 */
 export const builtinDefinitions = {
   exp: { arity: 1 }, log: { arity: 1 }, inv: { arity: 1 }, compose: { arity: 2 },
   revert: { arity: 1 }, diff: { arity: 1 }, integral: { arity: 1 }, map: { arity: 2 },
-  sqrt: { arity: 1 }, fps: { arity: 1 }, coeff: { arity: 2 }, if: { arity: 3 },
+  sqrt: { arity: 1 }, fps: { arity: 1, maxArity: 3 }, coeff: { arity: 2 }, if: { arity: 3 },
+  sum: { arity: 3, minArity: 2 }, prod: { arity: 3, minArity: 2 },
+  eulerTransform: { arity: 1 },
+  egf: { arity: 1, maxArity: 3 },
+  sin: { arity: 1, analytic: 'sin' }, cos: { arity: 1, analytic: 'cos' }, tan: { arity: 1, analytic: 'tan' },
+  sec: { arity: 1, analytic: 'sec' }, csc: { arity: 1, analytic: 'csc' }, cot: { arity: 1, analytic: 'cot' },
+  arcsin: { arity: 1, analytic: 'arcsin' }, arccos: { arity: 1, analytic: 'arccos' }, arctan: { arity: 1, analytic: 'arctan' },
+  arcsec: { arity: 1, analytic: 'arcsec' }, arccsc: { arity: 1, analytic: 'arccsc' }, arccot: { arity: 1, analytic: 'arccot' },
+  asin: { arity: 1, analytic: 'arcsin' }, acos: { arity: 1, analytic: 'arccos' }, atan: { arity: 1, analytic: 'arctan' },
+  asec: { arity: 1, analytic: 'arcsec' }, acsc: { arity: 1, analytic: 'arccsc' }, acot: { arity: 1, analytic: 'arccot' },
+  sinh: { arity: 1, analytic: 'sinh' }, cosh: { arity: 1, analytic: 'cosh' }, tanh: { arity: 1, analytic: 'tanh' },
+  sech: { arity: 1, analytic: 'sech' }, csch: { arity: 1, analytic: 'csch' }, coth: { arity: 1, analytic: 'coth' },
+  arcsinh: { arity: 1, analytic: 'arcsinh' }, arccosh: { arity: 1, analytic: 'arccosh' }, arctanh: { arity: 1, analytic: 'arctanh' },
+  arcsech: { arity: 1, analytic: 'arcsech' }, arccsch: { arity: 1, analytic: 'arccsch' }, arccoth: { arity: 1, analytic: 'arccoth' },
+  asinh: { arity: 1, analytic: 'arcsinh' }, acosh: { arity: 1, analytic: 'arccosh' }, atanh: { arity: 1, analytic: 'arctanh' },
+  asech: { arity: 1, analytic: 'arcsech' }, acsch: { arity: 1, analytic: 'arccsch' }, acoth: { arity: 1, analytic: 'arccoth' },
   factorial: { arity: 1 },
   seq: { arity: 1, minArity: 1, maxArity: 64 },
   recurrence: { arity: 3 }, linrec: { arity: 3 }, rationalGF: { arity: 3 },

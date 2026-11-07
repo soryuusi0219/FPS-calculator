@@ -160,8 +160,9 @@ test('括弧の対応と不一致を求め、補完は関数・宣言済み名�
   assert.deepEqual(completions('exp(',3,[]).items,[]);
 });
 
-test('サンプル集は分類・検索の枠だけで内容を持たない',()=>{
-  assert.deepEqual(notebookTemplates,[]);assert.equal(templateCategories.length,4);
+test('サンプル集の分類と検索はカタログと独立した一覧にも使える',()=>{
+  assert.ok(notebookTemplates.length>0);assert.ok(templateCategories.some(category=>category.id==='graphs'));
+  assert.deepEqual(filterTemplates([],'all',''),[]);
   const fixture=[{id:'test',title:'SEARCH',description:'説明',category:'trees' as const,document:{}}];
   assert.equal(filterTemplates(fixture,'trees',' search ').length,1);assert.equal(filterTemplates(fixture,'all','説明').length,1);assert.equal(filterTemplates(fixture,'systems','').length,0);
 });

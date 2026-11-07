@@ -8,6 +8,8 @@ import { freeSymbols } from './dependencies.ts';
 import type { CoefficientSeed } from '../core/differential-system.ts';
 import { builtinDefinition, validateBuiltinArity } from './builtins.ts';
 import type { Affine, ImplicitExpression, Jet } from '../core/implicit-types.ts';
+import { analyticSeries } from '../core/analytic-series.ts';
+import { analyticExpansion, isAnalyticKernel } from './analytic-functions.ts';
 interface Context<T> {
   differential?: { seed: CoefficientSeed; orders: number[]; initial: (T | undefined)[][] };
   field: Field<T>; names: string[]; definitions: ReadonlyMap<string, Expression>;
@@ -36,6 +38,8 @@ export function implicitCompiler<T>(context: Context<T>): (node: Expression) => 
   const jet = (value: Series<T>, derivative: Series<T>[], multiplier: Series<T>): Jet<T> => ({ value, derivatives: derivative.map((d) => d.mul(multiplier)) });
   function unary(name: string, a: Jet<T>): Jet<T> {
     const n = a.value.precision;
+    const analytic=builtinDefinition(name)?.analytic;
+    if(analytic&&isAnalyticKernel(analytic))return jet(analyticSeries(a.value,analytic),a.derivatives,analyticSeries(a.value,analytic,true));
     if (name === 'neg') return { value: a.value.neg(), derivatives: a.derivatives.map((d) => d.neg()) };
     if (name === 'fps') return a;
     if (name === 'exp') { const value = a.value.exp(); return jet(value, a.derivatives, value); }
@@ -123,6 +127,9 @@ export function implicitCompiler<T>(context: Context<T>): (node: Expression) => 
       const definition = context.definitions.get(node.name);
       if (!definition) throw new Error(`未定義の変数: ${node.name}`);
       result = compile(definition);
+    } else if (node.kind === 'call' && node.callee.kind === 'symbol' && builtinDefinition(node.callee.name)?.analytic) {
+      const name=node.callee.name,analytic=builtinDefinition(name)!.analytic!;
+      result=isAnalyticKernel(analytic)?combination([compile(node.args[0]!)],([a])=>unary(name,a!)):compile(analyticExpansion(analytic,node.args[0]!)!);
     } else if (node.kind === 'call' && node.callee.kind === 'symbol' && ['diff','integral'].includes(node.callee.name) && context.differential) {
       const name=node.callee.name, child=compile(node.args[0]!);
       result = {

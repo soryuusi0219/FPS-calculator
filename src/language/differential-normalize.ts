@@ -1,5 +1,7 @@
 import type { Expression } from './parser.ts';
 import { freeSymbols } from './dependencies.ts';
+import { builtinDefinition } from './builtins.ts';
+import { analyticExpansion, isAnalyticKernel } from './analytic-functions.ts';
 
 const integer=(n:bigint):Expression=>({kind:'integer',value:n});
 const binary=(operator:'+'|'-'|'*'|'/'|'^',left:Expression,right:Expression):Expression=>{
@@ -39,6 +41,14 @@ export function normalizeDifferential(expression:Expression,names:readonly strin
       if(name==='log')return binary('/',derivative(a),a);
       if(name==='inv')return binary('/',{kind:'unary',operator:'-',operand:derivative(a)},binary('^',a,integer(2n)));
       if(name==='sqrt')return binary('/',derivative(a),binary('*',integer(2n),node));
+      const analytic=builtinDefinition(name)?.analytic;
+      if(analytic) {
+        if(!isAnalyticKernel(analytic))return derivative(analyticExpansion(analytic,a)!);
+        if(analytic==='sin'||analytic==='sinh'||analytic==='cosh')return binary('*',call(analytic==='sin'?'cos':analytic==='sinh'?'cosh':'sinh',a),derivative(a));
+        if(analytic==='cos')return binary('*',{kind:'unary',operator:'-',operand:call('sin',a)},derivative(a));
+        const denominator=binary(analytic==='arcsin'||analytic==='arctanh'?'-':'+',integer(1n),binary('^',a,integer(2n)));
+        return binary('/',derivative(a),analytic==='arcsin'||analytic==='arcsinh'?call('sqrt',denominator):denominator);
+      }
     }
     throw new Error('この未知関数の微分は未対応です。和・積・商・スカラーべき・exp/log/sqrtの微分を使ってください。');
   }
@@ -66,6 +76,7 @@ export function differentialOrders(expressions:readonly Expression[],names:reado
     if(node.kind==='call') {
       const name=node.callee.kind==='symbol'?node.callee.name:'';
       if((name==='diff'||name==='integral')&&[...freeSymbols(node)].some(name=>names.includes(name)))calculus=true;
+      if(node.callee.kind==='symbol'&&names.includes(node.callee.name))visit(node.callee,shift);
       node.args.forEach(arg=>visit(arg,shift+(name==='diff'?1:name==='integral'?-1:0)));return;
     }
     if(node.kind==='binary'){visit(node.left,shift);visit(node.right,shift);}

@@ -56,6 +56,9 @@ export function mountCalculator(root: HTMLElement): void {
     initial(id, value, before) {
       if (change(() => model.updateInitial(id, value), `initial:${id}`, before ? { kind: 'expression', editor: before } : undefined)) recalculate();
     },
+    comment(id,value,before) {
+      if(change(()=>model.updateComment(id,value),`comment:${id}`,before?{kind:'expression',editor:before}:undefined)){persist();render();}
+    },
     addSystem() { const system = change(() => model.addSystem()); if (system) { recalculate(); notebook.focusSystem(system.id); } },
     removeSystem(id) { if (change(() => model.removeSystem(id))) recalculate(); },
     editSystem(id, field, value, before) {

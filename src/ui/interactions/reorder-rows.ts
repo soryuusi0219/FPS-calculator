@@ -1,3 +1,10 @@
+function scrollContainer(element: HTMLElement): HTMLElement | null {
+  for (let parent: HTMLElement | null = element; parent; parent = parent.parentElement) {
+    if (/^(auto|scroll)$/.test(getComputedStyle(parent).overflowY) && parent.scrollHeight > parent.clientHeight) return parent;
+  }
+  return null;
+}
+
 /** Pointer Eventsでマウスとタッチを共通化。ドラッグ中は挿入線だけを動かす。 */
 export function setupRowReordering(list: HTMLElement, onMove: (id: string, index: number) => void): void {
   const rows = () => [...list.querySelectorAll<HTMLElement>('.expression-row')];
@@ -19,6 +26,14 @@ export function setupRowReordering(list: HTMLElement, onMove: (id: string, index
     event.preventDefault();
     const row = handle.closest<HTMLElement>('.expression-row')!;
     const id = row.dataset.id!;
+    const container = scrollContainer(list);
+    const visibleBounds = () => {
+      const rectangle = list.getBoundingClientRect(), clip = container?.getBoundingClientRect();
+      return {
+        left: Math.max(rectangle.left, clip?.left ?? 0), right: Math.min(rectangle.right, clip?.right ?? innerWidth),
+        top: Math.max(0, rectangle.top, clip?.top ?? 0), bottom: Math.min(innerHeight, rectangle.bottom, clip?.bottom ?? innerHeight),
+      };
+    };
     const pointerId = event.pointerId;
     let active = false;
     let targetIndex: number | null = null;
@@ -32,8 +47,8 @@ export function setupRowReordering(list: HTMLElement, onMove: (id: string, index
     };
     const indicate = () => {
       clearIndicator();
-      const rectangle = list.getBoundingClientRect();
-      if (x < rectangle.left - 24 || x > rectangle.right + 24 || y < Math.max(0, rectangle.top) - 40 || y > Math.min(innerHeight, rectangle.bottom) + 40) { targetIndex = null; return; }
+      const rectangle = visibleBounds();
+      if (x < rectangle.left - 24 || x > rectangle.right + 24 || y < rectangle.top - 40 || y > rectangle.bottom + 40) { targetIndex = null; return; }
       const remaining = rows().filter((entry) => entry !== row);
       const before = remaining.findIndex((entry) => {
         const box = entry.getBoundingClientRect();
@@ -45,12 +60,12 @@ export function setupRowReordering(list: HTMLElement, onMove: (id: string, index
     };
     const scroll = () => {
       if (!active) return;
-      const rectangle = list.getBoundingClientRect();
-      const top = Math.max(0, rectangle.top);
-      const bottom = Math.min(innerHeight, rectangle.bottom);
+      const rectangle = visibleBounds();
+      const top = rectangle.top;
+      const bottom = rectangle.bottom;
       const delta = x >= rectangle.left && x <= rectangle.right ? y < top + 32 ? -10 : y > bottom - 32 ? 10 : 0 : 0;
       if (delta) {
-        if (list.scrollHeight > list.clientHeight) list.scrollTop += delta;
+        if (container) container.scrollTop += delta;
         else window.scrollBy(0, delta);
         indicate();
       }

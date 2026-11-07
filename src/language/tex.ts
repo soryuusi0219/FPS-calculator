@@ -41,9 +41,14 @@ export function expressionTex(node: Expression): string {
       if (['nPk', 'nHk'].includes(name) && node.args.length === 2) return `{}_{${tex(node.args[0]!)}}\\mathrm{${name[1]}}_{${tex(node.args[1]!)}}`;
       if (name === 'LambertW' && node.args.length === 1) return `W${group(tex(node.args[0]!))}`;
       if (name === 'factorial' && node.args.length === 1) return `${enclose(node.args[0]!, 11)}!`;
-      if (name === 'fps' && node.args[0]?.kind === 'lambda' && node.args[0].parameters.length === 1) {
+      if ((name === 'fps'||name==='egf') && node.args[0]?.kind === 'lambda' && node.args[0].parameters.length === 1) {
         const lambda = node.args[0]; const n = identifier(lambda.parameters[0]!);
-        return `\\sum_{${n}=0}^{\\infty}${enclose(lambda.body, 6)}x^{${n}}`;
+        const coefficient=enclose(lambda.body,6);
+        return `\\sum_{${n}=${node.args[1] ? tex(node.args[1]) : '0'}}^{${node.args[2] ? tex(node.args[2]) : '\\infty'}}${name==='egf'?`\\frac{${coefficient}}{${n}!}`:coefficient}x^{${n}}`;
+      }
+      if ((name === 'sum' || name === 'prod') && [2,3].includes(node.args.length)) {
+        const lambda = node.args.at(-1)!;
+        if (lambda.kind === 'lambda' && lambda.parameters.length === 1) return `\\${name}_{${identifier(lambda.parameters[0]!)}=${tex(node.args[0]!)}}^{${node.args.length === 3 ? tex(node.args[1]!) : '\\infty'}}${group(tex(lambda.body))}`;
       }
       return `${name ? `\\operatorname{${name.replaceAll('_', '\\_')}}` : group(tex(node.callee))}\\left(${node.args.map(tex).join(',\\,')}\\right)`;
     }
