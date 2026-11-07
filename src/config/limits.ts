@@ -24,3 +24,5 @@ export const MAX_NOTEBOOK_WIDTH = 1000;
 export const MAX_RECURRENCE_ORDER = 16;
 export const MAX_P_RECURSIVE_ORDER = 8;
 export const MAX_POLYNOMIAL_DEGREE = 8;
+export const MAX_AGGREGATE_TERMS = 4096;
+export const MAX_COMMENT_LENGTH = 2000;

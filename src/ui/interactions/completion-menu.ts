@@ -73,7 +73,8 @@ export class CompletionMenu {
   position(): void {
     if (!this.open) return;
     const rect = this.input.getBoundingClientRect();
-    if (rect.bottom < 0 || rect.top > innerHeight) { this.hide(); return; }
+    const panel = this.input.closest('.notebook')?.getBoundingClientRect();
+    if (rect.bottom < Math.max(0, panel?.top ?? 0) || rect.top > Math.min(innerHeight, panel?.bottom ?? innerHeight)) { this.hide(); return; }
     const left = Math.max(8, Math.min(innerWidth - 268, rect.left));
     this.popup.style.left = `${left}px`; this.popup.style.top = `${Math.max(8, Math.min(innerHeight - this.popup.offsetHeight - 8, rect.bottom + 4))}px`;
   }

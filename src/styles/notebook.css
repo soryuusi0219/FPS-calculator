@@ -50,6 +50,10 @@ dd { font-size: 10px; margin: 5px 0 0; }
 .row-initial summary { cursor: pointer; }
 .row-initial label { display: block; margin-top: 7px; }
 .expression-content .initial-input { width: 100%; min-width: 0; margin-top: 5px; padding: 5px; border: 1px solid var(--line); border-radius: 4px; font-size: 12px; }
+.row-comment { margin-top: 8px; font-size: 11px; color: #68766e; }
+.row-comment summary { cursor: pointer; }
+.comment-input { display: block; width: 100%; max-width: 100%; min-width: 0; margin-top: 7px; padding: 7px; border: 1px solid var(--line); border-radius: 4px; color: #304238; background: #fafbf8; font: 12px/1.7 var(--sans, sans-serif); resize: vertical; overflow-wrap: anywhere; }
+.comment-input:focus { outline: 2px solid #b0cdbb; }
 .equation-systems { margin: 0 26px 24px; border-top: 1px solid var(--line); padding-top: 20px; }
 .equation-systems h2 { font-size: 16px; }
 .equation-systems p { font-size: 11px; line-height: 1.8; color: #73816e; }

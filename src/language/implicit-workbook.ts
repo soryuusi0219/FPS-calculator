@@ -1,19 +1,20 @@
 import type { Field } from '../core/field.ts';
 import { LaurentSeries } from '../core/laurent.ts';
-import { DifferentialSystem } from '../core/differential-system.ts';
 import { differentialOrders, normalizeDifferential } from './differential-normalize.ts';
-import { ImplicitSystem } from '../core/implicit-system.ts';
 import { MAX_EQUATION_GROUPS, MAX_SYSTEM_TEXT_LENGTH, MAX_SYSTEM_UNKNOWNS } from '../config/limits.ts';
 import type { Calculation, EquationSystemInput, EquationSystemResult, RowResult, SolverMethod } from '../model/calculation.ts';
-import { Evaluator } from './evaluator.ts';
+import type { Evaluator } from './evaluator.ts';
 import type { Value } from './values.ts';
 import { parse, parseEquation, validDefinitionName } from './parser.ts';
 import type { Expression, Statement } from './parser.ts';
 import { expandCalls, freeSymbols, stronglyConnected } from './dependencies.ts';
-import { implicitCompiler } from './implicit-expression.ts';
+import { CausalSystem } from '../core/causal-system.ts';
+import { causalDefinitions, hasCausalOperators } from './causal-expression.ts';
+import { createAlgebraicSolver, createCausalSolver, createDifferentialSolver } from './implicit-solvers.ts';
+import type { SolverContext, WorkbookSolver } from './implicit-solvers.ts';
 
 interface System { input: EquationSystemInput; names: string[]; equations: Expression[]; error?: string }
-interface Group<T> { names: string[]; equations: Expression[]; method: SolverMethod; solver?: ImplicitSystem<T> | DifferentialSystem<T>; orders?: number[]; normalized?: boolean; precision: number; solving: boolean }
+interface Group<T> { names: string[]; equations: Expression[]; method: SolverMethod; solver?: WorkbookSolver<T>; orders?: number[]; normalized?: boolean; precision: number; solving: boolean }
 const lines = (source: string) => source.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
 
@@ -99,44 +100,46 @@ export class ImplicitWorkbook<T> {
     group.solving = true;
     try {
       for (const member of group.names) if (this.errors.has(member)) throw new Error(this.errors.get(member)!);
-      if (!group.solver) {
-        if(!group.normalized) {
-          group.equations=group.equations.map(equation=>normalizeDifferential(equation,group.names,node=>{
-            const value=this.evaluator!.evaluate(node,1);if(value.kind!=='boolean')throw new Error('条件には真偽値が必要です。');return value.value;
-          }));
-          const analysis=differentialOrders(group.equations,group.names);
-          if(analysis.calculus)group.orders=analysis.orders;
-          group.normalized=true;
-        }
-        if(group.orders) {
-          const seed={degree:undefined as number|undefined};
-          const initial=group.names.map((member,i): (T|undefined)[] => {
-            const expression=this.initial.get(member);if(!expression)return [];
-            const requested=Math.max(1,group.orders![i]!);
-            let value=this.evaluator!.evaluate(expression,requested);
-            if(value.kind==='scalar')return [value.value];
-            if(value.kind!=='fps')throw new Error(`${member} の初期係数にはスカラーまたはseq(...)を指定してください。`);
-            const count=value.knownTerms??requested;
-            if(count>requested)value=this.evaluator!.evaluate(expression,count);
-            if(value.kind!=='fps')throw new Error('初期係数には通常FPSが必要です。');
-            return [...value.series.asPowerSeries().coefficients].slice(0,count);
-          });
-          const compile=implicitCompiler({field:this.field,names:group.names,definitions:this.expressions,evaluate:(node,n)=>this.evaluator!.evaluate(node,n),differential:{seed,orders:group.orders,initial}});
-          group.solver=new DifferentialSystem(this.field,group.names,group.equations.map(compile),initial,group.orders,seed,group.equations.map(eq=>differentialOrders([eq],group.names).orders));
-        } else {
-          const compile = implicitCompiler({ field: this.field, names: group.names, definitions: this.expressions, evaluate: (node, n) => this.evaluator!.evaluate(node, n) });
-          const initial = group.names.map((member) => {
-            const expression = this.initial.get(member); if (!expression) return undefined;
-            const value = this.evaluator!.evaluate(expression, 1);
-            if (value.kind !== 'scalar') throw new Error(`${member} の定数項には有理数または素数modのスカラーが必要です。`);
-            return value.value;
-          });
-          group.solver = new ImplicitSystem(this.field, group.names, group.equations.map(compile), initial, group.method);
-        }
+      const definitions=causalDefinitions(group.equations,group.names);
+      const context = (): SolverContext<T> => ({
+        field: this.field, names: group.names, equations: group.equations,
+        definitions: this.expressions, initial: this.initial,
+        evaluate: (node, n) => this.evaluator!.evaluate(node, n), external: (name, n) => this.resolve(name, n),
+      });
+      const createCausal = () => createCausalSolver(context(), definitions);
+      let causalError:unknown;
+      if(!group.solver&&definitions&&hasCausalOperators(definitions)) {
+        try { const solver=createCausal();solver.solve(precision);group.solver=solver; }
+        catch(error){causalError=error;}
       }
-      const values = group.solver.solve(precision);
-      group.precision = Math.max(group.precision, precision);
-      return { kind: 'fps', series: new LaurentSeries(this.field, values[group.names.indexOf(name)]!.coefficients) };
+      try {
+        if (!group.solver) {
+          if(!group.normalized) {
+            group.equations=group.equations.map(equation=>normalizeDifferential(equation,group.names,node=>{
+              const value=this.evaluator!.evaluate(node,1);if(value.kind!=='boolean')throw new Error('条件には真偽値が必要です。');return value.value;
+            }));
+            const analysis=differentialOrders(group.equations,group.names);
+            if(analysis.calculus)group.orders=analysis.orders;
+            group.normalized=true;
+          }
+          group.solver = group.orders
+            ? createDifferentialSolver(context(), group.orders)
+            : createAlgebraicSolver(context(), group.method);
+        }
+        const values = group.solver.solve(precision);
+        group.precision = Math.max(group.precision, precision);
+        return { kind: 'fps', series: new LaurentSeries(this.field, values[group.names.indexOf(name)]!.coefficients) };
+      } catch(error) {
+        if(group.solver instanceof CausalSystem)throw error;
+        if(definitions&&!causalError) {
+          try {
+            const solver=createCausal(),values=solver.solve(precision);
+            group.solver=solver;group.precision=precision;
+            return {kind:'fps',series:new LaurentSeries(this.field,values[group.names.indexOf(name)]!.coefficients)};
+          } catch { /* 正則系の診断を維持する。 */ }
+        }
+        throw causalError??error;
+      }
     } catch (error) { throw new Error(`循環参照・連立系 [${group.names.join(', ')}]: ${errorText(error)}`); }
     finally { group.solving = false; }
   }

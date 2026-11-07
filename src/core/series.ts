@@ -1,5 +1,6 @@
 import type { Field } from './field.ts';
 import { MAX_INTEGER_EXPONENT } from '../config/limits.ts';
+import { CoefficientAlgebra } from './coefficient-series.ts';
 
 /** coefficients[i] = [x^i] f。length=N は mod x^N の精度を表す。 */
 export class Series<T> {
@@ -103,6 +104,21 @@ export class Series<T> {
   compose(inner: Series<T>): Series<T> {
     this.compatible(inner);
     if (!this.field.equal(inner.at(0), this.field.zero)) throw new Error('compose(f, g) は g(0) = 0 が必要です。');
+    // 総和や関数方程式で頻出する f(c*x^k) は添字の移動だけで求める。
+    const degrees=inner.coefficients.flatMap((value,n)=>this.field.equal(value,this.field.zero)?[]:[n]);
+    if(degrees.length<=1) {
+      const out=Array<T>(this.precision).fill(this.field.zero);
+      out[0]=this.at(0);
+      const degree=degrees[0];
+      if(degree!==undefined) {
+        let power=this.field.one;
+        for(let n=1;n*degree<this.precision;n++) {
+          power=this.field.mul(power,inner.at(degree));
+          out[n*degree]=this.field.mul(this.at(n),power);
+        }
+      }
+      return new Series(this.field,out);
+    }
     let out = Series.constant(this.field, this.field.zero, this.precision);
     for (let i = this.precision - 1; i >= 0; i--) {
       out = out.mul(inner).add(Series.constant(this.field, this.at(i), this.precision));
@@ -134,19 +150,19 @@ export class Series<T> {
     return new Series(f, out);
   }
 
-  /** Lagrange反転: [x^k] revert(f) = [t^(k-1)] (t/f(t))^k / k。 */
+  /** 合成の係数方程式を次数順に解く。標数で消える次数kによる除算は不要。 */
   revert(): Series<T> {
     const f = this.field;
     if (!f.equal(this.at(0), f.zero) || f.equal(this.at(1), f.zero)) throw new Error('revert(f) は f(0) = 0 かつ [x]f ≠ 0 が必要です。');
-    // x/f(x) はN-1項まで既知。それ以上の精度を仮定しない。
-    const h = new Series(f, this.coefficients.slice(1)).inv();
-    let power = Series.constant(f, f.one, h.precision);
-    const out = [f.zero];
-    for (let k = 1; k < this.precision; k++) {
-      power = power.mul(h);
-      out.push(f.div(power.at(k - 1), f.fromInteger(BigInt(k))));
-    }
-    return new Series(f, out);
+    const algebra=new CoefficientAlgebra(f);
+    const source=algebra.series(0,n=>{
+      if(n>=this.precision)throw new Error('合成逆関数の入力精度が不足しています。');
+      return this.at(n);
+    });
+    const inverse=algebra.revert(source);
+    const coefficients=Array.from({length:this.precision},(_,n)=>inverse.at(n));
+    algebra.validateDomains();
+    return new Series(f,coefficients);
   }
 
   /** 失われた最高次の係数を0と見なさない。呼び出し側が必要精度+1を用意する。 */

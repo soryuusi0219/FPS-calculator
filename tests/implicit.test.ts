@@ -135,7 +135,9 @@ test('ラムダの局所束縛を尊重し、捕獲なしで呼出しを展開�
 });
 
 test('対応していない作用素を含む循環や不正な初期値を拒否する', () => {
-  for(const source of ['f=compose(f,x^2)','f=map(f,a^2)','f=fps(n=>f[n])','f=f[0]+x']) assert.match(run([{source,initial:'0'}]).rows[0]!.error!,/未対応/);
+  for(const source of ['f=map(f,a^2)','f=fps(n=>f[n])']) assert.match(run([{source,initial:'0'}]).rows[0]!.error!,/未対応/);
+  assert.deepEqual(values([{source:'f=compose(f,x^2)',initial:'0'}]).rows[0]!.coefficients,zeros());
+  assert.deepEqual(values([{source:'f=f[0]+x',initial:'0'}]).rows[0]!.coefficients,['0','1','0','0','0','0']);
   assert.match(run([{source:'f=f^2+x',initial:'f[0]'}]).rows[0]!.error!,/定数項.*独立/);
   assert.match(run([{source:'f=f^2+x',initial:'fps(0)'}]).rows[0]!.error!,/スカラー/);
   assert.ok(run([{source:'f=1/(x*f)',initial:'1'}]).rows[0]!.error);

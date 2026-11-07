@@ -5,7 +5,7 @@ import type { NotebookToolActions } from './notebook-tools.ts';
 import { MAX_ROWS, MAX_TERMS } from '../../config/limits.ts';
 import type { Calculation, EquationSystemResult, RowResult } from '../../model/calculation.ts';
 import { query } from '../dom.ts';
-import type { EditorState, ExpressionActions } from './expression-row.ts';
+import type { EditorState, ExpressionActions } from './expression-row-types.ts';
 import { ExpressionList } from './expression-list.ts';
 import { EquationSystemsView } from './equation-systems-view.ts';
 import type { SystemActions, SystemFocus } from './equation-systems-view.ts';

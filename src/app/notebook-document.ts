@@ -1,4 +1,4 @@
-import { MAX_EQUATION_GROUPS, MAX_EXPRESSION_LENGTH, MAX_NOTEBOOK_BYTES, MAX_NOTEBOOK_WIDTH, MAX_ROWS, MAX_SYSTEM_TEXT_LENGTH, MAX_TERMS, MIN_NOTEBOOK_WIDTH } from '../config/limits.ts';
+import { MAX_COMMENT_LENGTH, MAX_EQUATION_GROUPS, MAX_EXPRESSION_LENGTH, MAX_NOTEBOOK_BYTES, MAX_NOTEBOOK_WIDTH, MAX_ROWS, MAX_SYSTEM_TEXT_LENGTH, MAX_TERMS, MIN_NOTEBOOK_WIDTH } from '../config/limits.ts';
 import type { Session } from './session.ts';
 import type { IdFactory } from './notebook-model.ts';
 import { newRow } from './notebook-model.ts';
@@ -12,13 +12,14 @@ export function decodeNotebook(value: unknown, id?: IdFactory): Session {
   const data = value.data;
   if (!Array.isArray(data.rows) || data.rows.length < 1 || data.rows.length > MAX_ROWS) fail(`数式行は1〜${MAX_ROWS}行にしてください。`);
   if (!data.rows.every((row: unknown) => record(row) && typeof row.source === 'string' && row.source.length <= MAX_EXPRESSION_LENGTH && (row.initial === undefined || typeof row.initial === 'string' && row.initial.length <= MAX_EXPRESSION_LENGTH))) fail(`数式・初期値は文字列で${MAX_EXPRESSION_LENGTH}文字までです。`);
+  if(!data.rows.every((row:unknown)=>record(row)&&(row.comment===undefined||typeof row.comment==='string'&&row.comment.length<=MAX_COMMENT_LENGTH)))fail(`コメントは文字列で${MAX_COMMENT_LENGTH}文字までです。`);
   if (typeof data.terms !== 'number' || !Number.isInteger(data.terms) || data.terms < 1 || data.terms > MAX_TERMS) fail(`打ち切り次数は1〜${MAX_TERMS}の整数にしてください。`);
   if (data.domain !== 'rational' && data.domain !== 'prime' || data.basis !== 'ogf' && data.basis !== 'egf' || typeof data.modulus !== 'string' || data.modulus.length > 10) fail('係数体・表示基底・modの形式が不正です。');
   if (data.systems !== undefined && (!Array.isArray(data.systems) || data.systems.length > MAX_EQUATION_GROUPS || !data.systems.every((system: unknown) => record(system) && typeof system.variables === 'string' && system.variables.length <= MAX_SYSTEM_TEXT_LENGTH && typeof system.equations === 'string' && system.equations.length <= MAX_SYSTEM_TEXT_LENGTH && typeof system.method === 'string' && ['auto', 'coefficient', 'newton'].includes(system.method)))) fail('連立グループの形式・文字数・個数が不正です。');
   const width = value.notebookWidth;
   return {
     input: {
-      rows: data.rows.map((row: { source: string; initial?: string }) => ({ ...newRow(row.source, id), ...(row.initial !== undefined ? { initial: row.initial } : {}) })),
+      rows: data.rows.map((row: { source: string; initial?: string; comment?: string }) => ({ ...newRow(row.source, id), ...(row.initial !== undefined ? { initial: row.initial } : {}), ...(row.comment !== undefined ? { comment: row.comment } : {}) })),
       terms: data.terms, domain: data.domain, basis: data.basis, modulus: data.modulus,
       ...(Array.isArray(data.systems) ? { systems: data.systems.map((system) => ({ id: newRow('', id).id, variables: system.variables as string, equations: system.equations as string, method: system.method as 'auto' | 'coefficient' | 'newton' })) } : {}),
     },
@@ -31,7 +32,7 @@ export function notebookDocument(session: Session) {
   return {
     format: 'fps-calculator', version: 1,
     data: { ...session.input,
-      rows: session.input.rows.map((row) => ({ source: row.source, ...(row.initial !== undefined ? { initial: row.initial } : {}) })),
+      rows: session.input.rows.map((row) => ({ source: row.source, ...(row.initial !== undefined ? { initial: row.initial } : {}), ...(row.comment !== undefined ? { comment: row.comment } : {}) })),
       ...(session.input.systems ? { systems: session.input.systems.map(({ variables, equations, method }) => ({ variables, equations, method })) } : {}),
     }, view: session.presentation,
   };

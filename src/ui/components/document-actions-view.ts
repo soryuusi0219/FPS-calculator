@@ -35,7 +35,7 @@ export class DocumentActionsView {
     query<HTMLButtonElement>(host, '#share-notebook').onclick = () => attemptToolAction(show, () => {
       this.share.value = actions.shareUrl();
       this.shareResult.hidden = false;
-      show('共有URLを作成しました。式と計算設定が含まれます。');
+      show('共有URLを作成しました。式・コメント・計算設定が含まれます。');
     });
     query<HTMLButtonElement>(host, '#copy-share-url').onclick = () => this.copyShareUrl();
   }

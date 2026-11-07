@@ -1,5 +1,5 @@
 /** Worker、評価器、UIの間で共有するDOM非依存の入出力。 */
-export interface InputRow { id: string; source: string; initial?: string }
+export interface InputRow { id: string; source: string; initial?: string; comment?: string }
 export type SolverMethod = 'auto' | 'coefficient' | 'newton';
 export interface EquationSystemInput { id: string; variables: string; equations: string; method: SolverMethod }
 export interface Calculation {

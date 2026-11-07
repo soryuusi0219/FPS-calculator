@@ -2,7 +2,7 @@ import type { Calculation, RowResult } from '../model/calculation.ts';
 import { isSeriesResult } from '../model/calculation.ts';
 
 export const valueLabels = { scalar: 'スカラー', fps: 'FPS', laurent: 'Laurent級数', analysis: '解析', lambda: 'ラムダ', boolean: '真偽値' };
-export const solverLabels: Record<string, string> = { 'differential-coefficient': '微積分・係数逐次法', 'fixed-point': '再帰', coefficient: '係数逐次法', newton: 'Newton法' };
+export const solverLabels: Record<string, string> = { 'causal-coefficient': '次数依存・係数逐次法', 'differential-coefficient': '微積分・係数逐次法', 'fixed-point': '再帰', coefficient: '係数逐次法', newton: 'Newton法' };
 
 export function rowPreview(result: RowResult | undefined, busy: boolean): string {
   if (busy) return '計算中…';

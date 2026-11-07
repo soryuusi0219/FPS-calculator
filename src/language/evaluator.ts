@@ -3,15 +3,15 @@ import { exactRoot, rational, rationalField } from '../core/field.ts';
 import { combinatorial, factorial } from '../core/combinatorics.ts';
 import { Series } from '../core/series.ts';
 import { LaurentSeries } from '../core/laurent.ts';
-import { catalanSeries, lambertW } from '../core/special-series.ts';
+import { catalanSeries } from '../core/special-series.ts';
 import { MAX_COEFFICIENT_INDEX, MAX_EVALUATION_DEPTH, MAX_EVALUATION_STEPS, MAX_INTEGER_EXPONENT, MAX_INTERNAL_PRECISION, MAX_POLE_ORDER, MAX_SCALAR_BITS, MIN_COEFFICIENT_INDEX } from '../config/limits.ts';
 import type { Expression } from './parser.ts';
 import { SourceError } from './source.ts';
 import { expressionRange } from './expression-range.ts';
 import type { Lambda, Scalar, Scope, Value } from './values.ts';
 export type { Value } from './values.ts';
-import { sequenceBuiltin, sequenceFunctionNames } from './sequence-functions.ts';
-import { builtinDefinition, validateBuiltinArity } from './builtins.ts';
+import { builtinDefinition } from './builtins.ts';
+import { evaluateBuiltin } from './evaluation/builtin-functions.ts';
 
 /** 型付きの値と要求精度。添字・指数にはmodで還元する前の厳密値を使う。 */
 export class Evaluator<T> {
@@ -135,6 +135,10 @@ export class Evaluator<T> {
       case 'call': {
         if (node.callee.kind === 'symbol' && builtinDefinition(node.callee.name)) return this.callBuiltin(node.callee.name, node.args, precision, scope);
         const callee = ev(node.callee);
+        if (callee.kind === 'fps') {
+          if (node.args.length !== 1) throw new Error('FPSの合成呼出しには引数が1個必要です。');
+          return { kind: 'fps', series: callee.series.compose(this.series(ev(node.args[0]!), precision, false)) };
+        }
         if (callee.kind !== 'lambda') throw new Error('呼び出せるのは関数またはラムダ式です。');
         return this.invoke(callee, node.args.map((arg) => ev(arg)), precision);
       }
@@ -156,6 +160,7 @@ export class Evaluator<T> {
     }
     if (index < BigInt(MIN_COEFFICIENT_INDEX) || index > BigInt(MAX_COEFFICIENT_INDEX)) throw new Error(`係数の添字は ${MIN_COEFFICIENT_INDEX}〜${MAX_COEFFICIENT_INDEX} の整数に制限しています。`);
     const value = this.evaluate(target, Number(index < 0n ? 1n : index + 1n), scope);
+    if (value.kind === 'history') return value.coefficient(Number(index));
     if (value.kind === 'scalar' && value.coefficient) return value.coefficient(Number(index));
     if (value.kind !== 'fps') throw new Error('係数抽出にはFPSが必要です。スカラーには添字を付けられません。');
     return this.fromCoefficient(this.series(value, Number(index < 0n ? 1n : index + 1n), false).at(Number(index)));
@@ -261,80 +266,16 @@ export class Evaluator<T> {
   }
 
   private callBuiltin(name: string, args: Expression[], precision: number, scope: Scope<T>): Value<T> {
-    const definition = builtinDefinition(name)!;
-    validateBuiltinArity(name, args.length);
-    if (sequenceFunctionNames.has(name)) return sequenceBuiltin({
-      field: this.field, evaluate: (node,n) => this.evaluate(node,n,scope),
-      integer: value => this.exactInteger(value), scalar: value => this.fromCoefficient(value), index: n => this.integer(BigInt(n)),
-      invoke: (lambda,values,n) => this.invoke(lambda,values,n), lookup: name => this.lookup(name),
-    },name,args,precision);
-    const arg = args[0]!;
-    const ev = (node: Expression, requested = precision) => this.evaluate(node, requested, scope);
-    if (name === 'if') return ev(this.condition(ev(arg)) ? args[1]! : args[2]!);
-    if (name === 'coeff') return this.index(arg, this.exactInteger(ev(args[1]!)), scope);
-    if (name === 'sqrt') return this.squareRoot(arg, precision, scope);
-    if (name === 'inv') return this.raise((requested) => ev(arg, requested), -1n, precision);
-    if (name === 'factorial') return this.integer(factorial(this.exactInteger(ev(arg))));
-    if (definition.combinatorial) return this.integer(combinatorial(definition.combinatorial, this.exactInteger(ev(arg)), this.exactInteger(ev(args[1]!))));
-    if (name === 'fps') {
-      const value = ev(arg);
-      if (value.kind !== 'lambda') {
-        const series = this.series(value, precision);
-        series.asPowerSeries();
-        return { kind: 'fps', series };
-      }
-      if (value.parameters.length !== 1) throw new Error('fps のラムダは次数を受け取る1引数にしてください。');
-      return { kind: 'fps', series: new LaurentSeries(this.field, Array.from({ length: precision }, (_, n) => this.requireScalar(this.invoke(value, [this.integer(BigInt(n))], precision)).value)) };
-    }
-    if (name === 'map') return this.map(arg, args[1]!, precision, scope);
-    if (name === 'diff') return { kind: 'fps', series: this.series(ev(arg, precision + 1), precision + 1).derivative() };
-    if (name === 'integral') {
-      const requested = Math.max(1, precision - 1);
-      return { kind: 'fps', series: this.series(ev(arg, requested), requested).integral().truncate(precision) };
-    }
-    if (name === 'revert') {
-      const requested = Math.max(2, precision);
-      return { kind: 'fps', series: this.series(ev(arg, requested), requested, false).revert().truncate(precision) };
-    }
-    const value = ev(arg);
-    if (name === 'Catalan' || name === 'LambertW') {
-      if (value.kind === 'scalar') {
-        if (!this.field.equal(value.value, this.field.zero)) throw new Error(`${name} のスカラー引数は0の場合のみ対応しています。`);
-        return this.integer(name === 'Catalan' ? 1n : 0n);
-      }
-      const input = this.series(value, precision, false).asPowerSeries();
-      const series = name === 'Catalan' ? catalanSeries(this.field, precision).compose(input) : lambertW(input);
-      return { kind: 'fps', series: new LaurentSeries(this.field, series.coefficients) };
-    }
-    if (name === 'compose') return { kind: 'fps', series: this.series(value, precision, false).compose(this.series(ev(args[1]!), precision, false)) };
-    if (value.kind === 'scalar') {
-      if (name === 'exp' && this.field.equal(value.value, this.field.zero)) return this.integer(1n);
-      if (name === 'log' && this.field.equal(value.value, this.field.one)) return this.integer(0n);
-      throw new Error(`${name} のスカラー引数は${name === 'exp' ? '0' : '1'}の場合のみ対応しています。`);
-    }
-    const series = this.series(value, precision, false);
-    return { kind: 'fps', series: name === 'exp' ? series.exp() : series.log() };
-  }
-
-  private map(source: Expression, transform: Expression, precision: number, scope: Scope<T>): Value<T> {
-    const sourceSeries = this.series(this.evaluate(source, precision, scope), precision, false);
-    let lambda: Lambda<T> | undefined;
-    if (transform.kind === 'lambda' || transform.kind === 'symbol' && !['a', 'n', 'i'].includes(transform.name)) {
-      const candidate = this.evaluate(transform, precision, scope);
-      if (candidate.kind === 'lambda') lambda = candidate;
-    }
-    if (lambda && lambda.parameters.length !== 1 && lambda.parameters.length !== 2) throw new Error('map のラムダは n または (a,n) の1〜2引数にしてください。');
-    const coefficients = Array.from({ length: precision - sourceSeries.startDegree }, (_, offset) => {
-      const n = offset + sourceSeries.startDegree;
-      const a = this.fromCoefficient(sourceSeries.at(n));
-      a.coefficient = (k) => this.index(source, BigInt(k), scope);
-      const index = this.integer(BigInt(n));
-      const extra = new Map<string, Value<T>>([['a', a], ['n', index], ['i', index]]);
-      const value = lambda
-        ? this.invoke(lambda, lambda.parameters.length === 1 ? [index] : [a, index], precision, extra)
-        : this.evaluate(transform, precision, new Map([...scope, ...extra]));
-      return this.requireScalar(value).value;
-    });
-    return { kind: 'fps', series: new LaurentSeries(this.field, coefficients, sourceSeries.startDegree) };
+    return evaluateBuiltin({
+      field: this.field, evaluate: (node, n, locals = scope) => this.evaluate(node, n, locals),
+      lookup: name => this.lookup(name), integer: value => this.integer(value),
+      exactInteger: value => this.exactInteger(value), scalar: (exact, value) => this.scalar(exact, value),
+      fromCoefficient: value => this.fromCoefficient(value), requireScalar: value => this.requireScalar(value),
+      condition: value => this.condition(value), series: (value, n, promote) => this.series(value, n, promote),
+      invoke: (lambda, values, n, extra) => this.invoke(lambda, values, n, extra),
+      index: (target, index) => this.index(target, index, scope),
+      raise: (producer, exponent, n) => this.raise(producer, exponent, n),
+      squareRoot: (node, n) => this.squareRoot(node, n, scope),
+    }, name, args, precision, scope);
   }
 }
