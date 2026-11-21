@@ -1,0 +1,29 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "A=sec(X)+tan(X)",
+        "comment": "π_1<π_2>π_3<…となる交代順列の個数。n=0,1は各1個。両向きを合わせるとn>=2では2倍です。参考: https://oeis.org/A000111"
+      },
+      {
+        "source": "Even=sec(X)",
+        "comment": "偶数長の交代順列を担当するEGFです。"
+      },
+      {
+        "source": "Odd=tan(X)",
+        "comment": "奇数長の交代順列を担当するEGFです。"
+      },
+      {
+        "source": "A-Even-Odd",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

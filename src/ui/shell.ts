@@ -5,8 +5,11 @@ export function createShell(root: HTMLElement) {
   <header class="app-header">
     <a class="brand" href="./" aria-label="FPS calculator ホーム"><span class="brand-symbol">ƒ</span><span>FPS <strong>calculator</strong></span></a>
     <span class="header-caption">形式冪級数を、手元で確かめる。</span>
+    <nav class="header-actions" aria-label="ヘルプと関連リンク">
+    <button id="open-reference" class="reference-trigger" type="button">ドキュメント</button>
     <a class="repository-link" href="https://github.com/soryuusi0219/FPS-calculator" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">GitHub ↗</a>
     <span class="version">LOCAL · v0.1</span>
+    </nav>
   </header>
   <main id="workspace" class="workspace">
     <aside id="notebook" class="notebook" aria-label="計算ノート" tabindex="0"></aside>
@@ -18,5 +21,6 @@ export function createShell(root: HTMLElement) {
     notebook: query<HTMLElement>(root, '#notebook'),
     separator: query<HTMLElement>(root, '#notebook-resizer'),
     inspector: query<HTMLElement>(root, '.inspector'),
+    reference: query<HTMLButtonElement>(root, '#open-reference'),
   };
 }

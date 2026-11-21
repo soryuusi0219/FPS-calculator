@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=fps(n=>nCk(2*n,n+offset))",
+        "comment": "固定したずれの列を生成します。二つの添字を動かす多変数母関数ではありません。"
+      },
+      {
+        "source": "offset=2",
+        "comment": "中央からのずれr>=0。n<rでは二項係数は0です。"
+      },
+      {
+        "source": "B=fps(n=>nCk(2*n,n))",
+        "comment": "中央の列。"
+      },
+      {
+        "source": "D=fps(n=>nCk(2*n,n+1))",
+        "comment": "一つずれた列。"
+      },
+      {
+        "source": "B-D-Catalan",
+        "comment": "中央列から一つずれた列を引くとCatalan数になります。Dyck路の反射原理に対応します。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

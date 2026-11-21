@@ -15,5 +15,5 @@ export interface ExpressionActions {
   breakHistoryGroup(): void;
   remove(id: string): void;
   duplicate(id: string): void;
-  add(): void;
+  add(afterId?: string): void;
 }

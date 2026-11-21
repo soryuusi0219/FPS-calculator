@@ -1,5 +1,6 @@
 import type { NotebookTemplate } from '../../app/templates.ts';
-import { filterTemplates, previewTemplate, templateCategories } from '../../app/templates.ts';
+import { filterTemplates, previewTemplate } from '../../app/templates.ts';
+import { templateCategories } from '../../app/bundled-samples.ts';
 import { query } from '../dom.ts';
 import { attemptToolAction } from '../tool-status.ts';
 import type { ShowToolStatus } from '../tool-status.ts';

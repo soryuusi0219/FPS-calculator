@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=exp(exp(X)-1)",
+        "comment": "各ブロックは空でないラベル付き集合（exp(X)-1）。その集合を作るので外側にもexpを使います。空集合の分割は1個。参考: https://oeis.org/A000110"
+      },
+      {
+        "source": "G=egf(n=>sum(0,n,k=>stirling2(n,k)))",
+        "comment": "n要素をkブロックに分ける第2種Stirling数の和から、同じEGFを生成します。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

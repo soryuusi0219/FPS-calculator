@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "U=(-log(1-T)-T-T^2/2)/2",
+        "comment": "サイクル長k>=3についてT^k/(2k)を足します。長さ1/2を除き、回転と向きの重複を除きます。log項の前は負号です。"
+      },
+      {
+        "source": "T=X*exp(T)",
+        "comment": "サイクルの各頂点に付くラベル付き根付き木。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "U-sum(3,k=>T^k/(2*k))",
+        "comment": "形式的に収束する無限和の定義と比較します。n=0,1,2は0で、n=3は三角形1個。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

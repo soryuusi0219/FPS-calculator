@@ -1,0 +1,37 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "T=X*exp(T)",
+        "comment": "根を取り除くとラベル付き根付き木の集合になるためT=X*exp(T)。n>=1で個数はn^(n-1)。n=0は0。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "U=T-T^2/2",
+        "comment": "ラベル付き自由木（根なし）のEGF。n=0は0、単点は1個。n>=2の個数はn^(n-2)です。"
+      },
+      {
+        "source": "T+LambertW(-X)",
+        "comment": "T=-LambertW(-X)となる原点の枝と比較します。"
+      },
+      {
+        "source": "T-revert(X*exp(-X))",
+        "comment": "T*exp(-T)=Xなので合成逆関数としても求められます。"
+      },
+      {
+        "source": "T-egf(n=>n==0?0:n^(n-1))",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "U-egf(n=>n==0?0:n==1?1:n^(n-2))",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

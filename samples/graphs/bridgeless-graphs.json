@@ -1,0 +1,37 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "H=integral(Q/X)",
+        "comment": "根を外すためnで割る操作です。空グラフは数えず、単点は橋を持たない連結グラフとして1個。先頭は0,1,0,1,10,253,…。"
+      },
+      {
+        "source": "A=egf(n=>2^(nCk(n,2)))",
+        "comment": "出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "L=log(A)",
+        "comment": "連結グラフのEGF。"
+      },
+      {
+        "source": "D=X*diff(L)",
+        "comment": "根付き連結グラフ。n頂点の対象の根の選択肢nを掛けます。"
+      },
+      {
+        "source": "E=X*exp(D)",
+        "comment": "根に接続する辺がすべて橋である根付き連結グラフのEGF。根を除くとDの集合です。"
+      },
+      {
+        "source": "Q=D(revert(E))",
+        "comment": "D=Q(E)を合成逆関数で解きます。Qは根付きの橋なし連結グラフです。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "Row=fps(k=>size==0?(k==0?1:0):(k<1?0:nCk(size,k)*nCk(size,k-1)/size),0,size)",
+        "comment": "N(n,k)=binom(n,k)binom(n,k-1)/n（n>=1）。長さ2nのDyck路で峰がk個のものを数えます。N(0,0)=1。出典: https://oeis.org/A001263"
+      },
+      {
+        "source": "size=5",
+        "comment": "行の番号n。0〜10程度で変更してください。行多項式ではXの次数が峰の数kです。"
+      },
+      {
+        "source": "peaks=2",
+        "comment": "列で固定する峰の数k。0以上の小さな整数。"
+      },
+      {
+        "source": "Column=fps(n=>n==0?(peaks==0?1:0):nCk(n,peaks)*nCk(n,peaks-1)/n)",
+        "comment": "固定kの列N(n,k)。n=0の分岐で0除算を避けます。"
+      },
+      {
+        "source": "sum(0,size,k=>Row[k])-Catalan[size]",
+        "comment": "行の係数和はCatalan数C_sizeです。この行はXの次数がk、Columnはnであることに注意してください。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

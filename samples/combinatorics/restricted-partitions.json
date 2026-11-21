@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "Distinct=prod(1,k=>1+X^k)",
+        "comment": "各サイズを高々1回使う、異なる部分への分割です。"
+      },
+      {
+        "source": "limit=3",
+        "comment": "最大部分の上限。正の小さい整数。"
+      },
+      {
+        "source": "Odd=prod(1,k=>1/(1-X^(2*k-1)))",
+        "comment": "各奇数サイズを何回でも使える分割です。"
+      },
+      {
+        "source": "Distinct-Odd",
+        "comment": "異なる部分への分割と奇数部分への分割は同じ個数になります。"
+      },
+      {
+        "source": "Bounded=prod(1,limit,k=>1/(1-X^k))",
+        "comment": "最大部分がlimit以下の分割。上端を指定した有限積です。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -1,0 +1,37 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=fps(n=>first*ratio^n)",
+        "comment": "a_n=first*ratio^n。n=0ではratio^0=1です。"
+      },
+      {
+        "source": "first=3",
+        "comment": "初項a_0。"
+      },
+      {
+        "source": "ratio=2",
+        "comment": "公比r。負数や0も指定できます。"
+      },
+      {
+        "source": "G=linrec(1,seq(ratio),seq(first))",
+        "comment": "a_n=ratio*a_(n-1)。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "F-first/(1-ratio*X)",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "M=exp(X^2/2)",
+        "comment": "n頂点の完全マッチング数。n=0は空のマッチング1個、奇数nは0。偶数2mでは(2m)!/(2^m*m!)です。"
+      },
+      {
+        "source": "N=egf(n=>n%2==1?0:n!/(2^(n/2)*(n/2)!))",
+        "comment": "偶奇で分岐し、必要な枝だけを評価します。"
+      },
+      {
+        "source": "M-N",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

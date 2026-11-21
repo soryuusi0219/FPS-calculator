@@ -1,0 +1,29 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=1/(1-P)",
+        "comment": "任意個の部品を順序を区別して並べるので、1+P+P^2+…となります。n=0の空列は1個。"
+      },
+      {
+        "source": "limit=3",
+        "comment": "使える部品サイズは1からlimitまで。正の小さい整数に変更してください。"
+      },
+      {
+        "source": "P=sum(1,limit,k=>X^k)",
+        "comment": "部品のサイズの母関数です。部品ごとに1種類ずつあるとします。"
+      },
+      {
+        "source": "F*(1-P)-1",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

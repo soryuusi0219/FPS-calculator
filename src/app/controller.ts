@@ -7,13 +7,14 @@ import { restoreSession, saveSession } from './session.ts';
 import { exportNotebook, importNotebook, decodeNotebook } from './notebook-document.ts';
 import { createShareUrl, readShareHash } from './sharing.ts';
 import { renameVariable } from './rename-variable.ts';
-import { notebookTemplates } from './templates.ts';
+import { notebookTemplates } from './bundled-samples.ts';
 import type { Session, Presentation } from './session.ts';
 import type { SessionStorage } from './session.ts';
 import { createShell } from '../ui/shell.ts';
 import { NotebookView } from '../ui/components/notebook-view.ts';
 import type { NotebookFocus } from '../ui/components/notebook-view.ts';
 import { InspectorView } from '../ui/components/inspector-view.ts';
+import { ReferenceView } from '../ui/components/reference-view.ts';
 import { setupNotebookResize } from '../ui/interactions/resize-panel.ts';
 import { setupHistoryShortcuts } from '../ui/interactions/history-shortcuts.ts';
 
@@ -32,6 +33,7 @@ export function mountCalculator(root: HTMLElement): void {
   const history = new EditHistory<HistorySnapshot>();
   let calculation: CalculationSnapshot = { busy: false, rows: new Map(), error: undefined };
   const shell = createShell(root);
+  new ReferenceView(shell.reference);
   const notebook = new NotebookView(shell.notebook, {
     exportJson: () => exportNotebook(session),
     importJson: (text) => replaceDocument(importNotebook(text)),
@@ -69,7 +71,7 @@ export function mountCalculator(root: HTMLElement): void {
     breakHistoryGroup: () => history.breakGroup(),
     undo: () => restoreHistory(false),
     redo: () => restoreHistory(true),
-    add() { addRow(); },
+    add(afterId) { addRow('', afterId); },
     duplicate(id) {
       const row = change(() => model.duplicate(id));
       if (!row) return;
@@ -134,8 +136,8 @@ export function mountCalculator(root: HTMLElement): void {
     inspector.render({ input: model.input, selectedRow: model.selectedRow, result: calculation.rows.get(model.selectedId), calculation, presentation: session.presentation });
   }
   function recalculate(): void { persist(); client.request(model.input); }
-  function addRow(source = ''): void {
-    const row = change(() => model.add(source));
+  function addRow(source = '', afterId?: string): void {
+    const row = change(() => model.add(source, afterId));
     if (!row) return;
     recalculate(); notebook.focus(row.id);
   }

@@ -66,6 +66,18 @@ test('最後の行を削除した後も元のID・内容・選択へ戻り、再
   assert.deepEqual(model.snapshot(), empty);
 });
 
+test('途中への行追加は1回のundo対象となり、redoで同じID・行順・選択を復元する', () => {
+  const { model, session } = notebook(), history = new EditHistory<NotebookSnapshot>();
+  const anchor = model.input.rows[1]!;
+  model.select(anchor.id); const before = model.snapshot();
+  const inserted = model.add('', anchor.id)!; history.record(before);
+  const after = model.snapshot();
+  assert.equal(model.input.rows[2]!.id, inserted.id);
+  model.restore(history.undo(model.snapshot())!); assert.deepEqual(model.snapshot(), before);
+  model.restore(history.redo(model.snapshot())!); assert.deepEqual(model.snapshot(), after);
+  assert.equal(model.input, session.input); assert.equal(history.canRedo, false);
+});
+
 test('連続した同じ欄の編集をまとめ、別の欄・時間経過・明示的な区切りで履歴を分ける', () => {
   let time = 0;
   const history = new EditHistory<string>(() => time);

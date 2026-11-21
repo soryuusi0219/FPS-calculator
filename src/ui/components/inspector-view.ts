@@ -5,7 +5,7 @@ import { isSeriesResult } from '../../model/calculation.ts';
 import { query } from '../dom.ts';
 import { renderMath } from '../math.ts';
 import { bindCopyButton } from '../clipboard.ts';
-import { basisNote, resultCopyText, texCopyText, valueLabels } from '../result-format.ts';
+import { basisNote, oeisSearchUrl, resultCopyText, texCopyText, valueLabels } from '../result-format.ts';
 import { ResultBodyView } from './result-body-view.ts';
 
 export interface InspectorProps {
@@ -27,12 +27,13 @@ export class InspectorView {
   private props: InspectorProps | undefined;
   private readonly copy: HTMLButtonElement;
   private readonly copyTex: HTMLButtonElement;
+  private readonly oeis: HTMLAnchorElement;
 
   constructor(host: HTMLElement, actions: InspectorActions) {
     this.host = host;
     host.innerHTML = `
       <div class="inspector-top"><p class="eyebrow">COEFFICIENT EXPLORER</p><span id="status" role="status" class="status"></span></div>
-      <div class="result-heading"><div><h2 id="result-heading">計算結果 <span id="value-type" class="value-type"></span></h2><p id="result-subtitle"></p></div><div class="copy-actions"><button id="copy-tex" class="secondary-button">TeXをコピー</button><button id="copy" class="secondary-button">係数をコピー</button></div></div>
+      <div class="result-heading"><div><h2 id="result-heading">計算結果 <span id="value-type" class="value-type"></span></h2><p id="result-subtitle"></p></div><div class="copy-actions"><button id="copy-tex" class="secondary-button">TeXをコピー</button><button id="copy" class="secondary-button">係数をコピー</button><a id="search-oeis" class="secondary-button" target="_blank" rel="noopener noreferrer" hidden>OEISで検索 ↗</a></div></div>
       <div id="expression-math" class="expression-math" aria-label="入力式の数式表示"></div>
       <div class="result-card">
         <div class="result-toolbar"><div class="basis-toggle" role="group" aria-label="係数表示の基底"><button id="ogf">O.G.F.</button><button id="egf">E.G.F.</button></div><div class="basis-toggle" role="group" aria-label="結果の表示形式"><button id="view-table">係数表</button><button id="view-series">級数</button></div><span id="basis-description"></span></div>
@@ -46,6 +47,7 @@ export class InspectorView {
     this.body = new ResultBodyView(query(host, '#result-body'), actions.add);
     this.copy = query(host, '#copy');
     this.copyTex = query(host, '#copy-tex');
+    this.oeis = query(host, '#search-oeis');
     for (const basis of ['ogf', 'egf'] as const) query<HTMLButtonElement>(host, `#${basis}`).onclick = () => actions.basis(basis);
     for (const view of ['table', 'series'] as const) query<HTMLButtonElement>(host, `#view-${view}`).onclick = () => actions.presentation(view);
     host.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((button) => { button.onclick = () => actions.add(button.dataset.example!); });
@@ -80,6 +82,10 @@ export class InspectorView {
     this.copy.disabled = busy || Boolean(error) || resultCopyText(result) === undefined;
     this.copy.textContent = this.copyLabel();
     this.copyTex.disabled = busy || !result?.tex;
+    const oeis = busy || error ? undefined : oeisSearchUrl(result);
+    if (oeis) this.oeis.href = oeis;
+    else this.oeis.removeAttribute('href');
+    this.oeis.hidden = !oeis;
     this.body.render({ input, result, busy, error, presentation });
   }
 }

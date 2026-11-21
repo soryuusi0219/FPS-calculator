@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=exp(Connected)",
+        "comment": "連結成分の集合を作ると任意の写像になります。空集合から自身への写像は1個です。"
+      },
+      {
+        "source": "T=X*exp(T)",
+        "comment": "ラベル付き根付き木を各サイクル頂点に付けます。ここで数える写像グラフは自己ループを許し、単純有向グラフのサンプルとは規約が違います。"
+      },
+      {
+        "source": "Connected=-log(1-T)",
+        "comment": "連結成分のサイクルの長さは1以上。ラベル付き有向サイクルの構成です。"
+      },
+      {
+        "source": "F-1/(1-T)",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "F-egf(n=>n==0?1:n^n)",
+        "comment": "n点からn点への写像の個数n^nと比較します。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

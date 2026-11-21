@@ -1,0 +1,29 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=exp(P)",
+        "comment": "そのようなブロックの集合を作ります。空集合の分割は1個。"
+      },
+      {
+        "source": "limit=3",
+        "comment": "1ブロックに含められる要素数の上限。正の小さな整数。limit=2では対合になります。"
+      },
+      {
+        "source": "P=sum(1,limit,k=>X^k/k!)",
+        "comment": "許される空でないラベル付きブロックのEGFです。"
+      },
+      {
+        "source": "Bell=exp(exp(X)-1)",
+        "comment": "制限なしのBell数のEGF。Fとは条件が異なるため、高次では一致しません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -22,6 +22,13 @@ export function resultCopyText(result?: RowResult): string | undefined {
     ? JSON.stringify({ startDegree: result.startDegree, coefficients: result.coefficients })
     : `[${result.coefficients.join(', ')}]`;
 }
+export function oeisSearchUrl(result?: RowResult): string | undefined {
+  if (!isSeriesResult(result) || result.error || !result.coefficients.length) return;
+  if (!result.coefficients.every(coefficient => /^-?[0-9]+$/.test(coefficient))) return;
+  const url = new URL('https://oeis.org/search');
+  url.searchParams.set('q', result.coefficients.join(','));
+  return url.href;
+}
 export function texCopyText(result?: RowResult): string | undefined {
   if (!result?.tex) return;
   return `${result.tex}${result.resultTex ? `\n\n${result.resultTex}` : ''}`;

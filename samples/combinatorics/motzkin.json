@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "M=1+X*M+X^2*M^2",
+        "comment": "空の路・最初の水平ステップ・上昇下降の組で分けます。M_0=1。先頭は1,1,2,4,9,21。"
+      },
+      {
+        "source": "G=(1-X-sqrt(1-2X-3X^2))/(2X^2)",
+        "comment": "定数項1の枝の閉形式。X^2での除算に必要な追加精度も自動的に計算します。"
+      },
+      {
+        "source": "M-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

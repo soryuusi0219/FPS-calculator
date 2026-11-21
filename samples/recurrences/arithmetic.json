@@ -1,0 +1,41 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=fps(n=>first+step*n)",
+        "comment": "等差数列を通常係数として生成します。nは0から始まる添字です。"
+      },
+      {
+        "source": "first=2",
+        "comment": "初項a_0。スカラーのパラメータです。"
+      },
+      {
+        "source": "step=3",
+        "comment": "公差d。a_n=first+step*n。"
+      },
+      {
+        "source": "G=linrec(2,seq(2,-1),seq(first,first+step))",
+        "comment": "a_n=2a_(n-1)-a_(n-2)という2階の同次漸化式でも同じ数列になります。"
+      },
+      {
+        "source": "H=first/(1-X)+step*X/(1-X)^2",
+        "comment": "ΣX^nとΣnX^nから得られる有理母関数です。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "F-H",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -1,0 +1,37 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=fps(n=>1)",
+        "comment": "通常係数がすべて1のOGF：1/(1-X)。O.G.F./E.G.F.ボタンは表示基底だけを変更します。"
+      },
+      {
+        "source": "G=egf(n=>1)",
+        "comment": "重みa_n=1をa_n/n!へ変換して生成するのでexp(X)です。E.G.F.表示では全項1になります。"
+      },
+      {
+        "source": "G-exp(X)",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "map(G,(a,n)=>a*n!)-F",
+        "comment": "通常係数をn!倍すると重みを通常係数として並べたFになります。mapも表示基底とは独立です。"
+      },
+      {
+        "source": "G[5]",
+        "comment": "係数抽出は常に通常係数なので、基底を切り替えても値は1/120です。"
+      },
+      {
+        "source": "H=egf(n=>1/n,1,3)",
+        "comment": "次数1〜3だけ生成します。範囲外ではラムダも除算も実行しないので、n=0の0除算を避けられます。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

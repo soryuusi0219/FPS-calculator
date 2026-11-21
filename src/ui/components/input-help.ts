@@ -6,6 +6,7 @@ export const inputHelpMarkup = `
         <dt>fps(n =&gt; 1/n,1,10)</dt><dd>次数1〜10の係数だけを生成。範囲外は0でラムダを実行しません。上端は省略可能</dd>
         <dt>egf(n =&gt; 1) / egf(n =&gt; a_n,lo,hi)</dt><dd>重みa_nから a_n X^n/n! を生成。egf(n=&gt;1)はexp(X)。表示基底とは独立し、範囲外は0</dd>
         <dt>eulerTransform(f)</dt><dd>f(0)=0から ∏(1-X^n)^(-[X^n]f) を生成。有理数または必要な整数を割れる素数modに対応</dd>
+        <dt>inverseEulerTransform(f)</dt><dd>f(0)=1の通常FPSからEuler積の指数を復元</dd>
         <dt>f=1+diff(X*X*f) / t=X*eulerTransform(t)</dt><dd>微分・合成・総和・map・ラムダ生成を含む、下の次数から決まる循環も係数順に計算</dd>
         <dt>f=X+X*revert(f)</dt><dd>合成逆関数を含む循環も、定数項0・一次係数非零で次数順に決まる場合に計算</dd>
         <dt>sin / cos / tan / sec / csc / cot</dt><dd>三角関数。sin(X)等で呼び出し、csc(X)やcot(X)はLaurent級数</dd>

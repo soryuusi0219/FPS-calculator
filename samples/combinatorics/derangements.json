@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=exp(-X)/(1-X)",
+        "comment": "n個のラベル付き要素の完全順列D_nのEGF。D_0=1,D_1=0です。E.G.F.表示なので表はD_nを表示します。参考: https://oeis.org/A000166"
+      },
+      {
+        "source": "G=egf(recurrence(2,seq(1,0),(a,n)=>(n-1)*(a[n-1]+a[n-2])))",
+        "comment": "D_n=(n-1)(D_(n-1)+D_(n-2))を整数上で計算して、EGFへ変換します。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

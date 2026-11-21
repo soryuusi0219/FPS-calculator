@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { renderToString } from 'katex';
-import { notebookTemplates, templateCategories, filterTemplates, previewTemplate } from '../src/app/templates.ts';
+import { filterTemplates, previewTemplate } from '../src/app/templates.ts';
+import { notebookTemplates, templateCategories, sampleMetadata, sampleDocuments } from './fixtures/sample-catalog.ts';
+import { createTemplateCatalog } from '../src/app/sample-catalog.ts';
 import { decodeNotebook, exportNotebook, importNotebook, notebookDocument } from '../src/app/notebook-document.ts';
 import { createShareUrl, readShareHash } from '../src/app/sharing.ts';
 import { NotebookModel } from '../src/app/notebook-model.ts';
@@ -22,6 +24,45 @@ function find(input:Calculation,result:CalculationResult,name:string):RowResult 
   const value=result.rows.find(row=>row.name===name)??result.rows[input.rows.findIndex(row=>row.source===name)];assert.ok(value,name);return value;
 }
 function coefficients(id:string,name:string) {const {input,result}=run(id);return find(input,result,name).coefficients!;}
+
+test('個別サンプルJSONは保存用のノートそのもので、メタデータから分類・順序を決める', () => {
+  assert.equal(Object.keys(sampleDocuments).length, notebookTemplates.length);
+  for (const [file, document] of Object.entries(sampleDocuments)) {
+    assert.match(file, /^[^/]+\/.+\.json$/);
+    assert.deepEqual(document, notebookDocument(importNotebook(JSON.stringify(document))), file);
+  }
+  const before = JSON.stringify({ sampleMetadata, sampleDocuments });
+  const catalog = createTemplateCatalog(sampleMetadata, sampleDocuments);
+  const metadata = sampleMetadata as { samples: { id: string }[] };
+  assert.deepEqual(catalog.templates.map(entry => entry.id), metadata.samples.map(entry => entry.id));
+  const loaded = load(catalog.templates[0]!.id); loaded.input.rows[0]!.comment = '編集';
+  assert.equal(JSON.stringify({ sampleMetadata, sampleDocuments }), before);
+});
+
+test('メタデータの重複・欠落・未登録ファイル・不正なノートを拒否する', () => {
+  const copy = () => JSON.parse(JSON.stringify(sampleMetadata)) as {
+    version: number; categories: { id: string; label: string }[];
+    samples: { id: string; category: string; file: string }[];
+  };
+  for (const bad of [null, {}, { ...copy(), version: 2 }, { ...copy(), categories: {} }, { ...copy(), samples: {} }]) assert.throws(() => createTemplateCatalog(bad, sampleDocuments));
+  for (const edit of [
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[1]!.id = metadata.samples[0]!.id; },
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[1]!.file = metadata.samples[0]!.file; },
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[0]!.category = 'missing'; },
+    (metadata: ReturnType<typeof copy>) => { metadata.categories[1]!.id = metadata.categories[0]!.id; },
+    (metadata: ReturnType<typeof copy>) => { metadata.categories[0]!.id = 'all'; },
+    (metadata: ReturnType<typeof copy>) => { metadata.categories[0]!.label = ''; },
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[0]!.file = '../outside.json'; },
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[0]!.file = '/outside.json'; },
+    (metadata: ReturnType<typeof copy>) => { metadata.samples[0]!.file = 'tree\\outside.json'; },
+  ]) { const metadata = copy(); edit(metadata); assert.throws(() => createTemplateCatalog(metadata, sampleDocuments)); }
+  const file = copy().samples[0]!.file, missing = { ...sampleDocuments }; delete missing[file];
+  assert.throws(() => createTemplateCatalog(sampleMetadata, missing), /見つかりません/);
+  assert.throws(() => createTemplateCatalog(sampleMetadata, { ...sampleDocuments, 'tree/unlisted.json': sampleDocuments[file] }), /登録されていません/);
+  for (const bad of [null, { format: 'other', version: 1, view: 'table' }, { format: 'fps-calculator', version: 1, view: 'bad' }]) assert.throws(() => createTemplateCatalog(sampleMetadata, { ...sampleDocuments, [file]: bad }));
+  const badNote = JSON.parse(JSON.stringify(sampleDocuments[file])); badNote.data.terms = 999;
+  assert.throws(() => createTemplateCatalog(sampleMetadata, { ...sampleDocuments, [file]: badNote }), /打ち切り次数/);
+});
 
 test('小さいグラフの全列挙を、EGF表示のグラフ・木・森・関数グラフと照合する',()=>{
   const counts:Record<string,number[]>=Object.fromEntries(['all','connected','unicyclic','eulerian','bipartite','bridgeless','blocks','trees','rootedTrees','forests','rootedForests','directed','dag','strong','tournament','functionalConnected'].map(key=>[key,[]]));

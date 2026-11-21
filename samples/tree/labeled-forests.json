@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=exp(U)",
+        "comment": "ラベル付きの森。各連結成分は自由木であり、根を選びません。先頭は1,1,2,7,38,291。"
+      },
+      {
+        "source": "T=X*exp(T)",
+        "comment": "ラベル付き根付き木。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "U=T-T^2/2",
+        "comment": "根を指定しないラベル付き木です。"
+      },
+      {
+        "source": "G=exp(T)",
+        "comment": "各成分で根を1点ずつ指定した森。Fとは別の数え上げです。"
+      },
+      {
+        "source": "G-egf(n=>n==0?1:(n+1)^(n-1))",
+        "comment": "根付き森の個数はn>=1で(n+1)^(n-1)。空の森を1個とします。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

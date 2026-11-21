@@ -1,0 +1,29 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=map(inv(W),(a,n)=>a*2^(nCk(n,2)))",
+        "comment": "正規化した級数を逆元にし、各係数の2冪を戻します。結果はDAG数のEGF。n=0は1です。"
+      },
+      {
+        "source": "W=egf(n=>(-1)^n/2^(nCk(n,2)))",
+        "comment": "sourceとして指定した頂点集合について包除し、2^binom(n,2)で係数を正規化した重みです。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "G=egf(recurrence(1,seq(1),(a,n)=>sum(1,n,k=>(-1)^(k-1)*nCk(n,k)*2^(k*(n-k))*a[n-k])))",
+        "comment": "source集合の包除を直接の整数漸化式として計算し、EGFに変換します。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}
