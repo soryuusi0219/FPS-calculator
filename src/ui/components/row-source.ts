@@ -58,7 +58,7 @@ export class RowSource {
       if (event.isComposing || event.keyCode === 229) return;
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)
         || (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') actions.breakHistoryGroup();
-      if (event.key === 'Enter') actions.add();
+      if (event.key === 'Enter') { event.preventDefault(); actions.add(row.id); }
     });
     this.input.addEventListener('keyup', reveal);
     this.input.addEventListener('click', reveal);

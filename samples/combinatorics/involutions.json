@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "I=exp(X+X^2/2)",
+        "comment": "ラベル付きの固定点（X）と無向の対（X^2/2）の集合です。空の対合は1個。"
+      },
+      {
+        "source": "J=egf(recurrence(2,seq(1,1),(a,n)=>a[n-1]+(n-1)*a[n-2]))",
+        "comment": "n番目の要素を固定点にするか、他のn-1要素と対にするかで分ける整数漸化式です。"
+      },
+      {
+        "source": "I-J",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

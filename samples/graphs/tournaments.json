@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=1-1/A",
+        "comment": "強連結成分の順序が一意なのでA=1+F+F^2+…=1/(1-F)。非空の強連結トーナメントのEGFを得ます。"
+      },
+      {
+        "source": "A=egf(n=>2^(nCk(n,2)))",
+        "comment": "各頂点対で辺の向きを2通りから選びます。全トーナメントは空のものを1個含みます。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "A*(1-F)-1",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

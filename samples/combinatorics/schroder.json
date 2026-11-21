@@ -1,0 +1,21 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "Large=1+X*Large+X*Large^2",
+        "comment": "大Schröder数。n=0から1,2,6,22,90,…。出典: https://oeis.org/A006318"
+      },
+      {
+        "source": "Small=(Large+1)/2",
+        "comment": "小Schröder数。n=0から1,1,3,11,45,…。n>=1では大の半分。mod2でこの除算は使えません。出典: https://oeis.org/A001003"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

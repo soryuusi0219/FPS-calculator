@@ -1,0 +1,31 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=F^2+X",
+        "initial": "0",
+        "comment": "定数項0の枝。各行の「再帰の初期値」を開くと0が指定されています。"
+      },
+      {
+        "source": "G=G^2+X",
+        "initial": "1",
+        "comment": "定数項1の枝。同じ方程式でも初期値が違うと別の級数です。"
+      },
+      {
+        "source": "F+G-1",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "F-X*Catalan",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

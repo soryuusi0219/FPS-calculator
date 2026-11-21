@@ -85,10 +85,12 @@ export class NotebookModel {
     if (index < 0) return false;
     this.input.systems!.splice(index, 1); return true;
   }
-  add(source = ''): InputRow | undefined {
+  add(source = '', afterId?: string): InputRow | undefined {
     if (this.input.rows.length >= MAX_ROWS) return;
+    const index = afterId === undefined ? this.input.rows.length : this.input.rows.findIndex(row => row.id === afterId) + 1;
+    if (afterId !== undefined && index === 0) return;
     const row = newRow(source, this.id);
-    this.input.rows.push(row);
+    this.input.rows.splice(index, 0, row);
     this.selectedId = row.id;
     return row;
   }

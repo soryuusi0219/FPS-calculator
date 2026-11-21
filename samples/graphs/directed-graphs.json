@@ -1,0 +1,21 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "A=egf(n=>2^(n*(n-1)))",
+        "comment": "順序付きの異なる頂点対n(n-1)個で、辺の有無を独立に選びます。空グラフは1個です。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "A-egf(n=>4^(nCk(n,2)))",
+        "comment": "各無向頂点対では「なし・片方向2種・両方向」の4通りです。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

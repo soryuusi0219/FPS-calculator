@@ -1,5 +1,5 @@
 import type { NotebookTemplate } from '../../app/templates.ts';
-import { notebookTemplates } from '../../app/templates.ts';
+import { notebookTemplates } from '../../app/bundled-samples.ts';
 import { query } from '../dom.ts';
 import { DocumentActionsView } from './document-actions-view.ts';
 import type { DocumentActions } from './document-actions-view.ts';

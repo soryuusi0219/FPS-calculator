@@ -1,6 +1,6 @@
 # 検証ガイド
 
-この文書は開発時のコマンドと検証項目の更新先。[起動手順](../README.md#起動)、[内部設計](architecture.md)、[利用仕様と上限](../README.md#入力と計算の上限)はそれぞれの文書を参照する。
+この文書は開発時のコマンドと検証項目の更新先。[起動手順](../README.md#起動)、[内部設計](architecture.md)、[利用仕様と上限](reference.md#上限)はそれぞれの文書を参照する。
 
 ## 基本コマンド
 
@@ -37,15 +37,16 @@ CIは[ci.yml](../.github/workflows/ci.yml)でnpm ci→npm test→npm run build�
 | 代数系 | [implicit.test.ts](../tests/implicit.test.ts) | 既知関数・閉形式・各解法・残差、初期値と枝、SCC/行順/束縛/グループ間依存、特異性、延長失敗後のキャッシュ |
 | 数列・復元 | [sequences.test.ts](../tests/sequences.test.ts) | 一般/線形漸化式、過去参照、推測の未使用検証項、有限精度比較、変換、p-recursiveの作用素と初期境界項 |
 | 微積分系 | [differential.test.ts](../tests/differential.test.ts) | ODE/積分再帰・初期jet・高階/混在系、非線形な最高階定数、特異性、必要な行/次数だけの線形系と残差 |
-| 総和・総積・次数依存 | [aggregates.test.ts](../tests/aggregates.test.ts) | 空範囲と型、有限化の証明/拒否、捕捉/ネスト、生成範囲、Euler変換、合成/map/ラムダを含む循環、未来/同次数参照 |
+| 総和・総積・次数依存 | [aggregates.test.ts](../tests/aggregates.test.ts) | 空範囲と型、有限化の証明/拒否、捕捉/ネスト、生成範囲、Euler変換と逆変換の往復・精度・標数、合成/map/ラムダを含む循環、未来/同次数参照 |
 | EGF・三角関数・revert循環 | [analytic.test.ts](../tests/analytic.test.ts) | 通常係数と重み、範囲・小標数、関数群の枝/極/恒等式、逆合成の両方向、初期値・定義域検証 |
 | コメント | [comments.test.ts](../tests/comments.test.ts) | 型/容量、計算・名前変更との独立性、保存/JSON/URL、行操作/複製/履歴 |
-| アプリ・Worker | [app.test.ts](../tests/app.test.ts) | 旧保存形式・保存拒否、移動後の削除/選択、最後の空行、複製とID、コピー、旧/重複応答・中断・時間超過と回復 |
+| アプリ・Worker | [app.test.ts](../tests/app.test.ts) | 旧保存形式・保存拒否、移動後の削除/選択、最後の空行、直後/末尾への追加とID・選択・保存、複製、コピー、OEISの検索語、旧/重複応答・中断・時間超過と回復 |
 | 履歴 | [history.test.ts](../tests/history.test.ts) | 行/設定/初期値/連立の復元、集約境界・分岐・上限、スナップショット独立性、session参照、再計算要否、IME保護 |
 | JSON・共有・編集支援 | [notebook-tools.test.ts](../tests/notebook-tools.test.ts) | 往復/旧形式/Unicode/不正データ/容量、ASTの範囲、名前変更の束縛・捕獲・部分反映拒否、補完/括弧/診断 |
-| サンプル | [templates.test.ts](../tests/templates.test.ts) | 全件の係数/残差/TeX、N=1・パラメータ境界・基底/mod、JSON/URL/undo、カタログ独立性、頂点数4以下のグラフ/木/森/写像グラフの全列挙 |
+| サンプル | [templates.test.ts](../tests/templates.test.ts) | 保存用JSONとの一致・メタデータの参照/重複/未登録検出、全件の係数/残差/TeX、N=1・パラメータ境界・基底/mod、JSON/URL/undo、カタログ独立性、頂点数4以下のグラフ/木/森/写像グラフの全列挙 |
+| ドキュメント | [reference.test.ts](../tests/reference.test.ts) | 全関数/別名の網羅、使用例の実評価、見出し/目次、MarkdownのHTML・画像・リンクの制約 |
 
-サンプルの固定期待値は[template-expectations.ts](../tests/fixtures/template-expectations.ts)。登録数の正は[READMEの一覧](../README.md#サンプル集)と実カタログを照合し、テスト件数を文書へ固定しない。
+サンプルの固定期待値は[template-expectations.ts](../tests/fixtures/template-expectations.ts)。登録数の正は[機能リファレンスの一覧](reference.md#サンプル集)と実カタログを照合し、テスト件数を文書へ固定しない。
 
 計算の変更では、既知の先頭係数だけでなく、最後に表示する係数、N=1、必要な追加精度、小さい素数の分母0、初期値・枝・未対応入力も選ぶ。特にexp(X)/X、X^(-2)*exp(X)、平方根・隣接係数map、循環系の外側の微分/抽出で末尾を失わないことを確認する。比較・推測の結果を無限級数の証明と表示しない。
 
@@ -57,8 +58,9 @@ UIを変更した場合は、利用可能な実ブラウザで該当項目を確
 
 | 変更箇所 | 確認する操作と状態 |
 | --- | --- |
+| 機能リファレンス | ヘッダーから開閉、Escapeとフォーカス復帰、目次リンク、Markdown保存、ノート/履歴/Worker不変、PC/320px、サブパス配信 |
 | 共通 | 計算Workerの結果・旧応答の拒否・エラーからの回復、係数体/基底、保存と再読み込み、320px以上の画面 |
-| 数式入力・構文支援 | 連続入力/貼り付け、フォーカス/カーソル/選択/横スクロール、括弧・補完のEnter/Tab/クリック確定と履歴、エラー位置、IME確定/取消と変換中のEnter保護 |
+| 数式入力・構文支援 | Enterで途中/末尾/移動後の行の直後へ追加・新規IDとフォーカス・undo/redo・行数上限、連続入力/貼り付け、フォーカス/カーソル/選択/横スクロール、括弧・補完のEnter/Tab/クリック確定と履歴、エラー位置、IME確定/取消と変換中のEnter保護 |
 | 初期値・連立欄 | scalar/seqの初期jet、変数/方程式/解法の編集と結果参照、複数行の補完/位置診断、IME、保存・undo/redo |
 | コメント | 改行・IME、開閉維持、選択と縦スクロール復元、複製/移動・保存/共有・履歴、編集だけではWorkerを再起動しないこと |
 | 行・幅 | 追加/複製/削除、マウス/タッチ/キーでの並べ替えと自動スクロール、Escape/pointercancel、移動後のID・選択結果・削除位置、ドラッグで文字選択を妨げないこと、幅の保存 |
@@ -66,7 +68,7 @@ UIを変更した場合は、利用可能な実ブラウザで該当項目を確
 | 履歴 | ボタン・Ctrl/Meta+Z・Shift+Z・Ctrl+Y、連続編集の集約と区切り、IME中、計算中/エラー後、フォーカス/選択/スクロール、保存復元 |
 | ノート入出力・名前変更 | ファイル入出力、読み込み/名前変更のundo、読み込み中の世代チェック、不正データで部分変更しないこと、共有リンクの復元 |
 | サンプル | 分類/複数語・式/コメント検索、件数・一覧スクロール・選択フォーカス、説明付きプレビュー、設定/連立/コメントを含む読み込みとundo、元カタログの独立性 |
-| 数列解析・結果表示 | 解析レポート、有理式追加、コピー/TeX、係数表/級数/OGF/EGF、Laurentの負次数と最低次数付きコピー |
+| 数列解析・結果表示 | 解析レポート、有理式追加、コピー/TeX、係数表/級数/OGF/EGF、Laurentの負次数と最低次数付きコピー、OEISリンクの出し分けと選択結果の検索語・別タブ遷移 |
 
 ## 文書だけの変更
 

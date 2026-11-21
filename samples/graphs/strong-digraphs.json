@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=-log(D)",
+        "comment": "D=exp(-F)から非空の強連結有向グラフを取り出します。単点は1個。先頭は0,1,1,18,1606,…。"
+      },
+      {
+        "source": "A=egf(n=>2^(nCk(n,2)))",
+        "comment": "全有向グラフ数2^(n(n-1))を2^binom(n,2)で割った正規化EGFです。全有向グラフそのもののEGFではありません。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "D=map(inv(A),(a,n)=>a*2^(nCk(n,2)))",
+        "comment": "source強連結成分の個数に(-1)^kの重みを付けた有向グラフのEGFへ、正規化を戻します。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

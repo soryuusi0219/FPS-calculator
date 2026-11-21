@@ -1,6 +1,6 @@
 # FPS calculator 設計書
 
-この文書は内部構造・数学的な計算契約・状態管理の設計を記録する。利用方法・構文・定義域・数値上限は[README](../README.md)、検証手順は[検証ガイド](testing.md)、未実装部分は[ロードマップ](roadmap.md)を正とする。実装済み機能の追加計画や作業履歴は重ねて記録しない。
+この文書は内部構造・数学的な計算契約・状態管理の設計を記録する。利用方法・構文・定義域・数値上限は[機能リファレンス](reference.md)、検証手順は[検証ガイド](testing.md)、未実装部分は[ロードマップ](roadmap.md)を正とする。実装済み機能の追加計画や作業履歴は重ねて記録しない。
 
 ## 計算の基本契約
 
@@ -56,7 +56,9 @@ flowchart LR
 | `app/notebook-model.ts` | 追加削除・並べ替え・選択。DOMに触れず、現在の順序から次の選択を決める |
 | `app/edit-history.ts` | undo/redoスタック、連続編集の集約、履歴上限。スナップショットの型は呼出し側が決める |
 | `app/session.ts` / `notebook-document.ts` | ブラウザ保存・JSONの共通検証、許可した項目だけの復元。Storageは外から受け取る |
-| `app/sharing.ts` / `rename-variable.ts` / `templates.ts` | URLの符号化・復元、束縛付き名前変更、分野別サンプル集の集約・検索・プレビュー。DOMに依存しない |
+| `app/sharing.ts` / `rename-variable.ts` / `templates.ts` | URLの符号化・復元、束縛付き名前変更、サンプル集の検索・プレビュー。DOMに依存しない |
+| `samples/index.json` / `samples/**/*.json` | 分類・一覧メタデータと、保存形式のサンプル本文。TypeScriptで生成しない |
+| `app/sample-catalog.ts` / `bundled-samples.ts` | メタデータと本文の共通検証、ViteのJSON収集。検証処理を環境固有の取得方法から分離 |
 | `app/calculation-client.ts` | Workerを所有し、デバウンス・世代番号・中断・旧応答破棄・重複応答破棄・時間上限を管理する |
 | `app/controller.ts` | Viewの操作を受け、モデル変更・保存・計算要求・再描画を連携させる |
 | `ui/components/` | ノート・式一覧・行入力・連立欄・結果ツールバー/本体の単位でDOMを所有する |
@@ -71,7 +73,7 @@ flowchart LR
 | `language/sequence-functions.ts` / `sequences/` | 数列関数の登録表、評価器とのコールバック境界、引数検証、多項式解析、演算別ハンドラ |
 | `language/aggregate.ts` / `infinite-bound.ts` / `degree-range.ts` | 型を維持する有限総和・総積、無限の尾の次数下界の証明、範囲付き生成の検証 |
 | `language/causal-expression.ts` / `core/causal-system.ts` / `coefficient-series.ts` | 係数への遅延参照、循環・未来参照の検出、次数順の確定と初期係数・残差検証 |
-| `core/euler-transform.ts` | Field上のEuler変換。DOM・名前解決・浮動小数点を持ち込まない |
+| `core/euler-transform.ts` | Field上のEuler変換と逆変換 |
 | `core/analytic-coefficients.ts` / `analytic-series.ts` | 厳密有理数のTaylor係数と導関数、位数に応じた合成、EGFのn!の重み |
 | `language/analytic-functions.ts` | 三角関数群の導出関数を既存の四則演算・平方根等のASTへ展開 |
 | `ui/components/row-comment.ts` | Plain textのコメント欄。IME・入力位置・履歴の接続。式の解析や実行はしない |
@@ -88,6 +90,8 @@ flowchart LR
 セッションの保存形式はversion:1を維持する。EvaluatorのValue型再export、ExpressionRowの型再exportとinput/editor/initialInput参照も維持し、内部モジュールはそれぞれvalues.tsとexpression-row-types.tsを参照する。
 
 ## 状態管理と履歴
+
+Enterによる行追加はRowSourceが編集中の行IDをactions.addへ渡し、controllerがNotebookModel.addのafterIdとして通知する。モデルは現在の行順から挿入位置を求め、新規IDの空行を直後へ追加・選択する。afterIdを渡さない追加ボタン・結果からの追加は末尾へ追加する。存在しないIDや行数上限では、ノート・選択・履歴を変更しない。追加は通常の変更処理を通して保存・再計算・入力フォーカス・1回のundo対象とする。補完中のEnter確定とIME保護はCodeEditor/RowSourceの既存経路で維持する。
 
 編集履歴はcontrollerが操作の直前にNotebookModelのスナップショットとViewから取得した入力位置を記録する。式の編集・行の追加/削除/複製/移動と計算設定を対象とし、選択・入力幅・結果の表示形式は独立させる。変更がなかった操作では履歴やredoを更新しない。同じ欄の短時間の連続入力は共有上限の期間で集約し、カーソル移動・フォーカス移動・貼り付け・IME変換で区切る。undo後の編集はredoを破棄する。
 
@@ -137,6 +141,8 @@ RowCommentはネイティブtextareaを保持し、IME確定時だけ編集を�
 
 `eulerTransform(f)`は定数項0のfに対して`exp(Σ_{k>=1} f(X^k)/k)`を求める。f=Σc_n X^nなら`∏_{n>=1}(1-X^n)^(-c_n)`に一致し、fがサイズの母関数なら多重集合を数える。core実装は約数方向にlogの係数を集め、通常のexpを使う。素数modで割れない整数が必要なら明示的なエラーとし、指数を代表元の整数へ勝手に持ち上げない。整数指数の無限積は`prod(1,k=>1/(1-X^k))`等で小標数でも直接計算できる。
 
+`inverseEulerTransform(G)`は通常FPSの対数を計算し、`[X^n]log(G)=Σ_{k|n} c_(n/k)/k`を次数順に解く。確定した係数`c_d`の寄与をdの倍数次数から引き、既知精度内の係数を復元する。定数項1の検査は精度1でも行う。
+
 通常FPSの`f(g)`は`compose(f,g)`の短縮形とし、gの定数項0を要求する。`Series.compose`は単項式の内側に対して添字移動を使い、一般の合成は従来のHorner法を保つ。和・積・範囲付きfpsのTeXもASTから生成する。形式的な無限演算の考え方は[Sageの遅延級数](https://doc.sagemath.org/html/en/reference/power_series/sage/rings/lazy_series_ring.html)も参照する。
 
 条件は真偽値のみ受け付け、`?:` / `if` と `&&` / `||` は選ばれた枝だけを評価する。例えば次数0で `1/n` を回避できる。評価回数・深さ・精度・整数関数の引数・スカラーサイズに上限を設け、Workerの時間制限も維持する。
@@ -166,6 +172,8 @@ mapは入力の最低格納次数からN-1までを対象とし、それより�
 TeX生成は各子ASTを一度だけ走査する。子を事前にTeX化した後に括弧付け処理でも再走査すると、長い左結合式で指数時間になるため避ける。長い加算式でも係数計算とTeX生成を完了する回帰テストを置く。
 
 係数表と横向き級数を切り替え、OGFでは負の次数を含むxべき、EGFでは非負次数のx^n/n!を描画する。最後には絶対精度のO(x^N)を付け、負の項の数だけO項の次数を増やさない。スカラーにはO項を付けない。
+
+OEIS検索URLは`ui/result-format.ts`でWorkerの表示用係数文字列から組み立てる。InspectorViewは現在の結果に応じて外部リンクを更新する。外部通信はリンクを開いたときのブラウザ遷移で行う。
 
 ## 長い式の編集と並べ替え
 
@@ -205,7 +213,7 @@ B = Σ_j x^(r-j) Σ_(m<j) p_j(m-j) a_m x^m
 L F = B
 ```
 
-を構成する。theta^k=Σ_l S(k,l)x^l D^lで通常の微分作用素へ展開し、境界項Bを落とさない。全係数に共通のx因子のみ除く。作用素の最小性・正則性は保証しない。一般の変換と初期境界条件の考え方は[gfun rectodiffeqの資料](https://perso.ens-lyon.fr/bruno.salvy/data/rectodiffeq.pdf)も参照する。各次数・項数の上限は[README](../README.md#入力と計算の上限)を参照する。
+を構成する。theta^k=Σ_l S(k,l)x^l D^lで通常の微分作用素へ展開し、境界項Bを落とさない。全係数に共通のx因子のみ除く。作用素の最小性・正則性は保証しない。一般の変換と初期境界条件の考え方は[gfun rectodiffeqの資料](https://perso.ens-lyon.fr/bruno.salvy/data/rectodiffeq.pdf)も参照する。各次数・項数の上限は[機能リファレンス](reference.md#上限)を参照する。
 
 微積分系は`differential-normalize.ts`で積・商・連鎖律を展開し、未知関数の微分次数を解析する。`implicit-expression.ts`は代数系と微積分系で式コンパイルを共有するが、後者のderivativesは点ごとの偏微分ではなく、現在求める係数方向のFrechet微分とする。微分・積分は値と方向微分の両方へ作用させ、各子式の必要精度を調整する。精度1の積分は子式を評価せずゼロとする。
 
@@ -245,9 +253,11 @@ revert(a)はb(0)=0とし、a(b)=Xのn次から`b_n=-(Σ_{k=2}^n a_k [X^n]b^k)/a_
 
 ## サンプル集の内容と採用基準
 
-内容・分類件数・主要な規約は[READMEのサンプル集](../README.md#サンプル集)、式・出典・説明は`src/app/templates/`の分野別カタログに置く。数式を構文として実行する経路は通常のノートと同じであり、サンプル用の計算エンジンを作らない。
+内容・分類件数・主要な規約は[機能リファレンス](reference.md#サンプル集)、ファイルの編集手順は[README](../README.md#サンプルの管理)を正とする。本文は`samples/tree/xxx.json`等に保存用ノートJSONとして置き、分類・ID・題名・説明・参照パス・表示順は`samples/index.json`で管理する。代表級数は本文の先頭行に配置する。サンプル用の式言語や計算エンジンは作らない。
 
-`app/templates.ts`はカタログを集約する。`templates/catalog.ts`が共通のversion:1生成・型・分類を所有し、代表級数を先頭に置く。検索は題名・説明・式・コメントのNFKC正規化と複数語AND。プレビューは共通検証器を通したノートをplain textへ整形する。TemplateLibraryViewは一覧のスクロールと選択のフォーカスを保ち、読み込みはcontrollerで1回のundo対象にする。元のカタログを編集せず、新規IDで復元する。
+`app/bundled-samples.ts`だけがViteのeagerなimport.meta.globでJSONを収集し、全ファイルを配信サブパスに依存せずビルドへ同梱する。`sample-catalog.ts`は環境非依存で、メタデータのversion・分類・参照・重複・未登録ファイルを検証し、本文をimportNotebook/notebookDocumentで検証・正規化してカタログを構成する。Nodeテストは`tests/fixtures/sample-catalog.ts`で同じファイル集合を取得し、同じ検証器へ渡す。新規サンプルのTypeScript登録表は持たない。
+
+`app/templates.ts`は題名・説明・式・コメントのNFKC正規化と複数語AND検索、説明付きplain textプレビューを担当する。TemplateLibraryViewは一覧のスクロールと選択のフォーカスを保ち、読み込みはcontrollerで1回のundo対象にする。元のJSONやカタログを変更せず、新規IDで復元する。
 
 追加時は以下を満たす。
 
@@ -255,7 +265,7 @@ revert(a)はb(0)=0とし、a(b)=Xのn次から`b_n=-(Σ_{k=2}^n a_k [X^n]b^k)/a_
 - 添字開始・空対象・符号・枝・ラベル/同型・ループ・単点/K2等の規約をコメントで明示する。出典の式も組合せ分解や既知項で独立に照合する。
 - 本文と独立した先頭6〜8項の固定期待値を`tests/fixtures/template-expectations.ts`へ置く。同じ式を再実行するだけの検証にせず、小サイズの全列挙や別表現との残差も利用する。
 - EGFの通常係数と表示する個数、N=1・パラメータ境界・追加精度・小標数での分母を検証する。小標数で使えない閉形式を隠さず、prodによる整数指数の経路等との違いをコメントで説明する。
-- JSON/URL・読み込みundo/redo・コメント・分類/検索/プレビュー・モバイル表示を検証する。追加後はREADMEの分類件数も更新する。手順は[検証ガイド](testing.md)を参照する。
+- JSON/URL・読み込みundo/redo・コメント・分類/検索/プレビュー・モバイル表示を検証する。追加後は機能リファレンスの分類件数も更新する。手順は[検証ガイド](testing.md)を参照する。
 
 ## 公開ワークフロー
 
@@ -265,6 +275,12 @@ revert(a)はb(0)=0とし、a(b)=Xのn次から`b_n=-(Σ_{k=2}^n a_k [X^n]b^k)/a_
 - Pages用artifactは`github-pages-<run_id>-<run_attempt>`という実行回ごとの名前にする。buildが名前とIDをjob outputsへ出し、deployだけの再実行でも同じ出力を使う。deploy側でrun_attemptから再計算しない。
 - APIで取得できるまで5秒間隔・最大12回確認する。複数候補や異なるIDを黙って採用しない。actions:readで照会し、pages:write/id-token:writeはdeployだけへ与える。
 - ビルドのbaseを配信先のサブパスに合わせる。JS・Worker・CSS・同梱KaTeXフォントがサブパスから読めることを確認し、distはコミットしない。
+
+## アプリ内のドキュメント
+
+利用機能の本文は`docs/reference.md`に集約し、README・AGENTSから参照する。ReferenceViewがヘッダーのボタンと独立したネイティブdialogを接続し、初回表示時に同梱Markdownを描画する。閉じた後も本文DOMとスクロールを保つ。ノート・履歴・Workerを操作せず、Escape・フォーカス制御はdialogの標準動作を使う。目次リンクはダイアログ内を移動し、ノートの共有URL用フラグメントを変更しない。
+
+`ui/documentation/markdown.ts`は[MarkedのRenderer](https://marked.js.org/using_pro#renderer)を使う同期変換。本文はリポジトリへ同梱したMarkdownだけを使い、ノート等のユーザー入力を渡さない。生HTMLと画像はエスケープして文字として扱い、リンクは文書内アンカーとhttp(s)へ限定する。見出しIDにreference-を付け、メイン画面と衝突させない。Viteの?rawで本文、?urlでMarkdown保存用のアセットを読み込み、base配下へ同梱する。実行時の外部取得は行わない。スタイルは`styles/reference.css`へ分離する。
 
 ## 今後の実装計画
 

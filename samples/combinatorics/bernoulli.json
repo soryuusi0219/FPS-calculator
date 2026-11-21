@@ -1,0 +1,21 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "B=X/(exp(X)-1)",
+        "comment": "定義 ΣB_n X^n/n!=X/(exp(X)-1)。B_0=1,B_1=-1/2を採用します。表示をO.G.F.へ変えるとB_n/n!です。出典: https://dlmf.nist.gov/24.2"
+      },
+      {
+        "source": "B*(exp(X)-1)-X",
+        "comment": "分母の定数項は0ですが、x因子が相殺されて通常FPSになります。modでは内部で必要なexpの次数の分母も可逆である必要があります。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

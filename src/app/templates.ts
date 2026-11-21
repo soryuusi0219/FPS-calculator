@@ -1,17 +1,7 @@
-import type { NotebookTemplate } from './templates/catalog.ts';
-import { recurrenceTemplates } from './templates/recurrences.ts';
-import { combinatoricsTemplates } from './templates/combinatorics.ts';
-import { treeTemplates } from './templates/trees.ts';
-import { graphTemplates } from './templates/graphs.ts';
-import { tutorialTemplates } from './templates/tutorials.ts';
+import type { NotebookTemplate } from './sample-catalog.ts';
 import { decodeNotebook } from './notebook-document.ts';
-export { templateCategories } from './templates/catalog.ts';
-export type { NotebookTemplate } from './templates/catalog.ts';
+export type { NotebookTemplate } from './sample-catalog.ts';
 
-/** ノートは共通のversion:1検証器を通して新しいIDで読み込む。計算コードは含めない。 */
-export const notebookTemplates: readonly NotebookTemplate[] = [
-  ...recurrenceTemplates, ...combinatoricsTemplates, ...treeTemplates, ...graphTemplates, ...tutorialTemplates,
-];
 const normalize = (value: string) => value.normalize('NFKC').toLocaleLowerCase();
 function searchText(entry: NotebookTemplate): string {
   const document=entry.document as {data?:{rows?:{source?:unknown;comment?:unknown}[]}}|null;

@@ -1,0 +1,35 @@
+.header-actions { display: flex; align-items: center; gap: 16px; margin-left: auto; flex-shrink: 0; }
+.header-actions .version { margin-left: 0; }
+.reference-trigger { color: #edf5ee; background: #294439; border: 1px solid #638073; border-radius: 5px; padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+.reference-trigger:hover { background: #375849; }
+.reference-dialog { width: min(1000px, calc(100vw - 24px)); height: 90vh; height: 90dvh; max-height: calc(100dvh - 24px); padding: 0; border: 1px solid #b5c8bb; border-radius: 10px; color: #223732; background: #fff; box-shadow: 0 12px 60px #172e3240; }
+.reference-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.reference-dialog::backdrop { background: #142c2690; }
+.reference-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--line); background: #f0f5ef; }
+.reference-toolbar h2 { font-size: 17px; margin: 0; }
+.reference-controls { display: flex; align-items: center; gap: 8px; }
+.reference-controls a { text-decoration: none; }
+.reference-content { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 22px clamp(16px, 4vw, 40px) 40px; font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+.reference-content h1 { font-size: 25px; }
+.reference-content h2 { font-size: 21px; margin: 36px 0 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.reference-content h3 { font-size: 17px; margin: 26px 0 10px; }
+.reference-content h4 { font-size: 15px; }
+.reference-content a { color: #226c53; text-underline-offset: 3px; }
+.reference-content :is(h1,h2,h3,h4):focus { outline: 2px solid #91bda6; outline-offset: 3px; }
+.reference-content pre { max-width: 100%; overflow-x: auto; padding: 14px 16px; background: #f2f5ef; border-radius: 6px; font: 12px/1.8 var(--mono); }
+.reference-content :not(pre) > code { padding: 1px 4px; background: #eff4ee; border-radius: 3px; font-size: .92em; }
+.reference-table { overflow-x: auto; max-width: 100%; margin: 14px 0; }
+.reference-content table { min-width: 520px; font: 12px/1.7 var(--mono); }
+.reference-content th, .reference-content td { padding: 10px 12px; min-width: 0; vertical-align: top; }
+.reference-content th { font-weight: 600; background: #f0f5ed; }
+.reference-content th:first-child { width: auto; }
+@media (max-width: 1050px) { .app-header .header-caption { display: none; } }
+@media (max-width: 720px) {
+  .app-header { height: auto; min-height: 64px; padding: 10px 16px; flex-wrap: wrap; gap: 8px 12px; }
+  .header-actions { gap: 10px; }
+  .header-actions .version { display: none; }
+  .reference-trigger { font-size: 11px; padding: 7px 9px; }
+  .reference-toolbar { padding: 10px 12px; }
+  .reference-toolbar h2 { font-size: 15px; }
+  .reference-content { font-size: 13px; }
+}

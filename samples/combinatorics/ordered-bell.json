@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=1/(2-exp(X))",
+        "comment": "空でないラベル付き集合の列：1/(1-(exp(X)-1))。空列は1個。"
+      },
+      {
+        "source": "G=egf(n=>sum(0,n,k=>k!*stirling2(n,k)))",
+        "comment": "kブロックの分割にk!通りの順序を付けて和を取ります。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

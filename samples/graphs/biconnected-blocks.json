@@ -1,0 +1,37 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "H=integral(Q)",
+        "comment": "空グラフ・単点を含まず、K2を1個のブロックとします。先頭は0,0,1,1,10,238,…。3頂点以上を要求する狭義の2-頂点連結と区別してください。"
+      },
+      {
+        "source": "A=egf(n=>2^(nCk(n,2)))",
+        "comment": "出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "L=log(A)",
+        "comment": "非空の連結グラフのEGF。"
+      },
+      {
+        "source": "D=X*diff(L)",
+        "comment": "根付き連結グラフ。D(0)=0で一次係数は1です。"
+      },
+      {
+        "source": "J=log(diff(L))",
+        "comment": "頂点を一つ特別視した連結グラフを、関節点で分解します。diff(L)の定数項は1です。"
+      },
+      {
+        "source": "Q=J(revert(D))",
+        "comment": "根付き連結グラフの合成を外して、ブロックの微分のEGFを得ます。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

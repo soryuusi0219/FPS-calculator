@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=fps(n=>nCk(2*n,n))",
+        "comment": "長さ2nの列でn個の位置を選ぶ個数です。先頭は1,2,6,20,70,252。"
+      },
+      {
+        "source": "G=1/sqrt(1-4X)",
+        "comment": "二項展開で得られる母関数です。有理数係数または必要な根・分母を持つ体で計算します。"
+      },
+      {
+        "source": "F-G",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

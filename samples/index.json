@@ -1,0 +1,391 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "combinatorics",
+      "label": "組合せ論"
+    },
+    {
+      "id": "recurrences",
+      "label": "漸化式"
+    },
+    {
+      "id": "trees",
+      "label": "木"
+    },
+    {
+      "id": "graphs",
+      "label": "グラフ"
+    },
+    {
+      "id": "systems",
+      "label": "連立系"
+    }
+  ],
+  "samples": [
+    {
+      "id": "arithmetic",
+      "title": "等差数列と有理母関数",
+      "category": "recurrences",
+      "description": "入門 OGF。初項・公差を編集し、ラムダ生成・線形漸化式・有理式を比較します。",
+      "file": "recurrences/arithmetic.json"
+    },
+    {
+      "id": "geometric",
+      "title": "等比数列と逆元",
+      "category": "recurrences",
+      "description": "入門 OGF。初項・公比を変更し、1階の線形漸化式と幾何級数を比較します。",
+      "file": "recurrences/geometric.json"
+    },
+    {
+      "id": "fibonacci",
+      "title": "Fibonacci数と有理式の復元",
+      "category": "recurrences",
+      "description": "入門 OGF。F_0=0,F_1=1。linrec・rationalGF・明示式を比べます。",
+      "file": "recurrences/fibonacci.json"
+    },
+    {
+      "id": "lucas",
+      "title": "Lucas数：同じ漸化式の別の初期値",
+      "category": "recurrences",
+      "description": "入門 OGF。Lucas数とFibonacci数の違いは初期値です。",
+      "file": "recurrences/lucas.json"
+    },
+    {
+      "id": "tribonacci",
+      "title": "Tribonacci数と3階の漸化式",
+      "category": "recurrences",
+      "description": "入門 OGF。直前3項の和。初期値0,0,1の流儀を使います。",
+      "file": "recurrences/tribonacci.json"
+    },
+    {
+      "id": "tilings",
+      "title": "長さ1・2のタイル敷き",
+      "category": "recurrences",
+      "description": "入門 OGF。空の敷き方を1個として、Fibonacci数の添字ずれを確認します。",
+      "file": "recurrences/tilings.json"
+    },
+    {
+      "id": "compositions",
+      "title": "許される部品サイズと順序付き整数分割",
+      "category": "recurrences",
+      "description": "入門 OGF。列（SEQ）と整数分割の違い。有限総和・パラメータ編集。",
+      "file": "recurrences/compositions.json"
+    },
+    {
+      "id": "derangements",
+      "title": "Montmort数：完全順列",
+      "category": "combinatorics",
+      "description": "入門 EGF。固定点を持たない置換。包含排除と整数漸化式を比較します。",
+      "file": "combinatorics/derangements.json"
+    },
+    {
+      "id": "bell",
+      "title": "Bell数：集合分割と二重exp",
+      "category": "combinatorics",
+      "description": "入門 EGF。集合の集合を数えるexp(exp(X)-1)。Stirling数による定義と比較。",
+      "file": "combinatorics/bell.json"
+    },
+    {
+      "id": "bernoulli",
+      "title": "Bernoulli数とx因子の相殺",
+      "category": "combinatorics",
+      "description": "入門 EGF。有理数のBernoulli数。B_1=-1/2の流儀とLaurent除算の追加精度。",
+      "file": "combinatorics/bernoulli.json"
+    },
+    {
+      "id": "partitions",
+      "title": "整数分割：無限積とEuler変換",
+      "category": "combinatorics",
+      "description": "入門 OGF。順序を区別しない整数分割p(n)。p(0)=1。",
+      "file": "combinatorics/partitions.json"
+    },
+    {
+      "id": "catalan",
+      "title": "Catalan数：組み込み・再帰・平方根",
+      "category": "combinatorics",
+      "description": "入門 OGF。C_0=1。二分木・Dyck路の数え上げを3通りで比較。",
+      "file": "combinatorics/catalan.json"
+    },
+    {
+      "id": "franel",
+      "title": "Franel数：二項係数の3乗和",
+      "category": "combinatorics",
+      "description": "中級 OGF。有限総和から多項式係数漸化式・微分方程式へ。",
+      "file": "combinatorics/franel.json"
+    },
+    {
+      "id": "catalan-convolution",
+      "title": "Catalan convolution：r重通常畳み込み",
+      "category": "combinatorics",
+      "description": "中級 OGF。Catalan^rの係数を閉形式と比較。rは正の整数のパラメータ。",
+      "file": "combinatorics/catalan-convolution.json"
+    },
+    {
+      "id": "central-binomial",
+      "title": "中央二項係数と平方根",
+      "category": "combinatorics",
+      "description": "入門 OGF。binom(2n,n)と(1-4X)^(-1/2)。",
+      "file": "combinatorics/central-binomial.json"
+    },
+    {
+      "id": "shifted-binomial",
+      "title": "中央からずれた二項係数とballot数",
+      "category": "combinatorics",
+      "description": "中級 OGF。固定offsetのbinom(2n,n+offset)。反射原理によるCatalan数との関係。",
+      "file": "combinatorics/shifted-binomial.json"
+    },
+    {
+      "id": "alternating-permutations",
+      "title": "交代順列：sec(X)+tan(X)",
+      "category": "combinatorics",
+      "description": "入門 EGF。Euler zigzag数。最初の不等号の向きを固定します。",
+      "file": "combinatorics/alternating-permutations.json"
+    },
+    {
+      "id": "motzkin",
+      "title": "Motzkin数と水平ステップ",
+      "category": "combinatorics",
+      "description": "中級 OGF。非負の格子路。非線形再帰と平方根の解。",
+      "file": "combinatorics/motzkin.json"
+    },
+    {
+      "id": "delannoy",
+      "title": "Delannoy数：中央列と長方形",
+      "category": "combinatorics",
+      "description": "中級 OGF。(1,0),(0,1),(1,1)で進む格子路。固定する添字を変える例。",
+      "file": "combinatorics/delannoy.json"
+    },
+    {
+      "id": "narayana",
+      "title": "Narayana数：行・列とCatalanの細分化",
+      "category": "combinatorics",
+      "description": "中級 OGF。Dyck路の峰。固定行の多項式と固定列を生成します。",
+      "file": "combinatorics/narayana.json"
+    },
+    {
+      "id": "schroder",
+      "title": "大小Schröder数（Schroder / Schroeder）",
+      "category": "combinatorics",
+      "description": "中級 OGF。大小と添字の違い。横断的な格子路の数え上げ。",
+      "file": "combinatorics/schroder.json"
+    },
+    {
+      "id": "stirling-columns",
+      "title": "Stirling数：ブロック数とサイクル数",
+      "category": "combinatorics",
+      "description": "中級 EGF。第2種と符号なし第1種の固定列。expとlogの構成。",
+      "file": "combinatorics/stirling-columns.json"
+    },
+    {
+      "id": "involutions",
+      "title": "対合：固定点と2サイクル",
+      "category": "combinatorics",
+      "description": "入門 EGF。逆置換と等しい置換。部分マッチングとも対応。",
+      "file": "combinatorics/involutions.json"
+    },
+    {
+      "id": "perfect-matchings",
+      "title": "完全マッチング：偶数個の要素を対にする",
+      "category": "combinatorics",
+      "description": "入門 EGF。ラベル付きの無向ペアの集合。奇数項は0。",
+      "file": "combinatorics/perfect-matchings.json"
+    },
+    {
+      "id": "ordered-bell",
+      "title": "順序付きBell数（Fubini数）",
+      "category": "combinatorics",
+      "description": "中級 EGF。集合分割のブロックに順序を付ける例。",
+      "file": "combinatorics/ordered-bell.json"
+    },
+    {
+      "id": "restricted-set-partitions",
+      "title": "サイズ制限付き集合分割",
+      "category": "combinatorics",
+      "description": "中級 EGF。ブロックサイズの上限をパラメータで変え、Bell数と比べます。",
+      "file": "combinatorics/restricted-set-partitions.json"
+    },
+    {
+      "id": "restricted-partitions",
+      "title": "異なる部分・奇数部分・最大部分の整数分割",
+      "category": "combinatorics",
+      "description": "中級 OGF。無限積の条件変更。Eulerの「異なる部分＝奇数部分」を比較。",
+      "file": "combinatorics/restricted-partitions.json"
+    },
+    {
+      "id": "plane-trees",
+      "title": "平面根付き木：子の順序を区別する",
+      "category": "trees",
+      "description": "中級 OGF。頂点数で数えた平面木とCatalan数の添字ずれ。",
+      "file": "tree/plane-trees.json"
+    },
+    {
+      "id": "labeled-trees",
+      "title": "ラベル付き根付き木・自由木とLambertW",
+      "category": "trees",
+      "description": "中級 EGF。Cayleyの公式、再帰、LambertW、revertを比較します。",
+      "file": "tree/labeled-trees.json"
+    },
+    {
+      "id": "labeled-forests",
+      "title": "ラベル付き森：各成分に根を付けるか",
+      "category": "trees",
+      "description": "中級 EGF。自由木の集合と根付き木の集合を比較。空の森は1個です。",
+      "file": "tree/labeled-forests.json"
+    },
+    {
+      "id": "unlabeled-trees",
+      "title": "ラベルなし根付き木・自由木",
+      "category": "trees",
+      "description": "中級 OGF。同型な木を同一視する数え上げ。Euler変換とdissymmetry。",
+      "file": "tree/unlabeled-trees.json"
+    },
+    {
+      "id": "unlabeled-forests",
+      "title": "ラベルなし森と根付き森：多重集合",
+      "category": "trees",
+      "description": "中級 OGF。expではなくEuler変換。同型と成分の根の指定を区別します。",
+      "file": "tree/unlabeled-forests.json"
+    },
+    {
+      "id": "functional-graphs",
+      "title": "写像グラフ：サイクルに根付き木を付ける",
+      "category": "trees",
+      "description": "発展 EGF。各点から1本の出辺。自己ループを許す写像のグラフを数えます。",
+      "file": "tree/functional-graphs.json"
+    },
+    {
+      "id": "undirected-graphs",
+      "title": "全無向グラフと連結グラフ",
+      "category": "graphs",
+      "description": "入門 EGF。ラベル付き単純グラフ。exp/logで連結成分を分解。",
+      "file": "graphs/undirected-graphs.json"
+    },
+    {
+      "id": "unicyclic-graphs",
+      "title": "なもり：単一サイクルの連結グラフ",
+      "category": "graphs",
+      "description": "中級 EGF。ラベル付き、頂点数＝辺数。サイクル長は3以上。",
+      "file": "graphs/unicyclic-graphs.json"
+    },
+    {
+      "id": "eulerian-graphs",
+      "title": "連結オイラーグラフ：全頂点が偶次数",
+      "category": "graphs",
+      "description": "中級 EGF。連結性を外して数え、logで取り出します。",
+      "file": "graphs/eulerian-graphs.json"
+    },
+    {
+      "id": "bipartite-graphs",
+      "title": "二部グラフと2彩色の区別",
+      "category": "graphs",
+      "description": "中級 EGF。色付きから連結・色なし・全二部グラフへ。",
+      "file": "graphs/bipartite-graphs.json"
+    },
+    {
+      "id": "bridgeless-graphs",
+      "title": "橋なし連結グラフ（単点を含む）",
+      "category": "graphs",
+      "description": "発展 EGF。2-辺連結成分の分解。合成逆関数・根付けと積分。",
+      "file": "graphs/bridgeless-graphs.json"
+    },
+    {
+      "id": "biconnected-blocks",
+      "title": "二重連結ブロック（K2を含む）",
+      "category": "graphs",
+      "description": "発展 EGF。関節点による分解と、微分・log・revert・積分。",
+      "file": "graphs/biconnected-blocks.json"
+    },
+    {
+      "id": "directed-graphs",
+      "title": "ラベル付き有向グラフ：反対向きの辺",
+      "category": "graphs",
+      "description": "入門 EGF。ループなし。2点間で反対向きの2辺を同時に許します。",
+      "file": "graphs/directed-graphs.json"
+    },
+    {
+      "id": "dag",
+      "title": "ラベル付きDAGと包除・重み付き逆元",
+      "category": "graphs",
+      "description": "発展 EGF。入次数0の頂点による包除。係数の2冪の正規化が必要です。",
+      "file": "graphs/dag.json"
+    },
+    {
+      "id": "strong-digraphs",
+      "title": "強連結有向グラフとsource成分の包除",
+      "category": "graphs",
+      "description": "発展 EGF。通常の有向グラフ数を2冪で正規化して逆元を取り、logへ進みます。",
+      "file": "graphs/strong-digraphs.json"
+    },
+    {
+      "id": "tournaments",
+      "title": "トーナメントと強連結トーナメント",
+      "category": "graphs",
+      "description": "中級 EGF。各頂点対にちょうど片向きの辺。成分が全順序を持ちます。",
+      "file": "graphs/tournaments.json"
+    },
+    {
+      "id": "ogf-egf",
+      "title": "OGF/EGF：生成と表示は別の操作",
+      "category": "recurrences",
+      "description": "入門。fpsとegf、階乗による変換、範囲付き生成・係数抽出を比べます。",
+      "file": "recurrences/ogf-egf.json"
+    },
+    {
+      "id": "sequence-transforms",
+      "title": "Fibonacci数の変換：部分和・二項・Hadamard・抽出",
+      "category": "recurrences",
+      "description": "中級 OGF。数列変換と隣接係数map、次数による分岐。",
+      "file": "recurrences/sequence-transforms.json"
+    },
+    {
+      "id": "guess-compare",
+      "title": "推測と比較：未使用項での検証",
+      "category": "recurrences",
+      "description": "中級。Fibonacci数の漸化式推測、検証不一致の例、有限精度の比較。",
+      "file": "recurrences/guess-compare.json"
+    },
+    {
+      "id": "algebraic-system",
+      "title": "Catalan数を明示的な連立方程式で解く",
+      "category": "systems",
+      "description": "中級 OGF。u=1+Xv、v=u^2。定数項と代入残差。",
+      "file": "systems/algebraic-system.json"
+    },
+    {
+      "id": "quadratic-branches",
+      "title": "初期値で枝を選ぶ：F=F^2+X",
+      "category": "systems",
+      "description": "中級 OGF。同じ方程式の2つの定数項と、再帰の初期値欄。",
+      "file": "systems/quadratic-branches.json"
+    },
+    {
+      "id": "exponential-ode",
+      "title": "指数関数：微分方程式と積分再帰",
+      "category": "systems",
+      "description": "中級 OGF。u'=u,u(0)=1とF=1+integral(F)を比べます。",
+      "file": "systems/exponential-ode.json"
+    },
+    {
+      "id": "harmonic-ode",
+      "title": "sin・cos：連立微分方程式",
+      "category": "systems",
+      "description": "中級 OGF。s'=c、c'=-s、s(0)=0,c(0)=1。",
+      "file": "systems/harmonic-ode.json"
+    },
+    {
+      "id": "differential-recurrence",
+      "title": "微分を含む次数順の再帰：階乗",
+      "category": "systems",
+      "description": "中級 OGF。F=1+diff(X^2*F)。微分があっても下の次数から決まる例。",
+      "file": "systems/differential-recurrence.json"
+    },
+    {
+      "id": "reversion-cycle",
+      "title": "revertを含む循環：合成逆関数の係数依存",
+      "category": "systems",
+      "description": "発展 OGF。F=X+X*revert(F)。一次係数と未来参照の区別。",
+      "file": "systems/reversion-cycle.json"
+    }
+  ]
+}

@@ -13,3 +13,20 @@ export function eulerTransform<T>(input: Series<T>): Series<T> {
   }
   return new Series(f, logarithm).exp();
 }
+
+/** log(g)[n] = sum_{k|n} f[n/k]/k を次数順に反転する。 */
+export function inverseEulerTransform<T>(input: Series<T>): Series<T> {
+  const field = input.field;
+  if (!field.equal(input.at(0), field.one)) {
+    throw new Error('inverseEulerTransform(f) には f(0)=1 が必要です。');
+  }
+  const coefficients = [...input.log().coefficients];
+  for (let degree = 1; degree < input.precision; degree++) {
+    for (let multiple = 2; multiple * degree < input.precision; multiple++) {
+      const index = multiple * degree;
+      const contribution = field.div(coefficients[degree]!, field.fromInteger(BigInt(multiple)));
+      coefficients[index] = field.sub(coefficients[index]!, contribution);
+    }
+  }
+  return new Series(field, coefficients);
+}

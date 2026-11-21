@@ -8,7 +8,7 @@ export const builtinDefinitions = {
   revert: { arity: 1 }, diff: { arity: 1 }, integral: { arity: 1 }, map: { arity: 2 },
   sqrt: { arity: 1 }, fps: { arity: 1, maxArity: 3 }, coeff: { arity: 2 }, if: { arity: 3 },
   sum: { arity: 3, minArity: 2 }, prod: { arity: 3, minArity: 2 },
-  eulerTransform: { arity: 1 },
+  eulerTransform: { arity: 1 }, inverseEulerTransform: { arity: 1 },
   egf: { arity: 1, maxArity: 3 },
   sin: { arity: 1, analytic: 'sin' }, cos: { arity: 1, analytic: 'cos' }, tan: { arity: 1, analytic: 'tan' },
   sec: { arity: 1, analytic: 'sec' }, csc: { arity: 1, analytic: 'csc' }, cot: { arity: 1, analytic: 'cot' },

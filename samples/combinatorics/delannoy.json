@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "D=1/sqrt(1-6X+X^2)",
+        "comment": "中央Delannoy数D(n,n)。先頭は1,3,13,63,321,1683。"
+      },
+      {
+        "source": "height=3",
+        "comment": "長方形の高さm。0以上の小さな整数に変更してください。"
+      },
+      {
+        "source": "E=fps(n=>sum(0,n,k=>nCk(n,k)^2*2^k))",
+        "comment": "中央列を有限二項和から生成します。"
+      },
+      {
+        "source": "D-E",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "Rectangle=fps(n=>sum(0,n,k=>nCk(height,k)*nCk(n,k)*2^k))",
+        "comment": "係数nはD(height,n)。中央列とは別の、片方の添字を固定した列です。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

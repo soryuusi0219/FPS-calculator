@@ -1,0 +1,40 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "u",
+        "comment": "上の連立欄を使います。未知数u,vの定数項を各1に指定した、通常FPSの正則な代数系です。"
+      },
+      {
+        "source": "v",
+        "comment": "vはCatalanの通常畳み込みの2乗です。"
+      },
+      {
+        "source": "u-Catalan",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "u-1-X*v",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "v-u^2",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353",
+    "systems": [
+      {
+        "variables": "u=1\nv=1",
+        "equations": "u=1+X*v\nv=u^2",
+        "method": "auto"
+      }
+    ]
+  },
+  "view": "table"
+}

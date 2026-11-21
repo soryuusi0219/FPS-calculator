@@ -1,0 +1,57 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=X/(1-X-X^2)",
+        "comment": "変換する元の数列F_0=0,F_1=1。"
+      },
+      {
+        "source": "S=partialSums(F)",
+        "comment": "係数nはF_0+…+F_n。"
+      },
+      {
+        "source": "B=binomialTransform(F)",
+        "comment": "係数nはΣ binom(n,k)F_k。"
+      },
+      {
+        "source": "inverseBinomialTransform(B)-F",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "H=hadamard(F,F)",
+        "comment": "通常の級数の積ではなく、係数ごとの積F_n^2です。"
+      },
+      {
+        "source": "Even=even(F)",
+        "comment": "係数nはF_(2n)。"
+      },
+      {
+        "source": "Odd=odd(F)",
+        "comment": "係数nはF_(2n+1)。"
+      },
+      {
+        "source": "B-Even",
+        "comment": "Fibonacci数の二項変換は偶数番目の項の列と一致します。"
+      },
+      {
+        "source": "Every=extract(F,3,1)",
+        "comment": "係数nはF_(3n+1)。必要な入力精度は出力より高くなります。"
+      },
+      {
+        "source": "Next=map(F,(a,n)=>a[n+1])",
+        "comment": "a[j]は元のFのj次係数。出力の最高次でも隣接係数を失わないように再評価します。"
+      },
+      {
+        "source": "Mask=map(F,(a,n)=>n%2==0?a:0)",
+        "comment": "偶数次数だけ残し、次数は詰めません。even(F)との違いを確認してください。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

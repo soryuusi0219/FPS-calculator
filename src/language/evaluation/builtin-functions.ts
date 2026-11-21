@@ -1,7 +1,7 @@
 import { combinatorial, factorial } from '../../core/combinatorics.ts';
 import { LaurentSeries } from '../../core/laurent.ts';
 import { catalanSeries, lambertW } from '../../core/special-series.ts';
-import { eulerTransform } from '../../core/euler-transform.ts';
+import { eulerTransform, inverseEulerTransform } from '../../core/euler-transform.ts';
 import { kernelCoefficient } from '../../core/analytic-coefficients.ts';
 import { analyticSeries } from '../../core/analytic-series.ts';
 import type { Expression } from '../parser.ts';
@@ -47,7 +47,11 @@ export function evaluateBuiltin<T>(runtime: BuiltinRuntime<T>, name: string, arg
     invoke: (lambda,index,n) => runtime.invoke(lambda,[runtime.integer(BigInt(index))],n),
     evaluateBody: (lambda,node,n) => runtime.evaluate(node,n,lambda.scope),
   },name === 'prod',args,precision);
-  if (name === 'eulerTransform') return { kind: 'fps', series: new LaurentSeries(runtime.field,eulerTransform(runtime.series(ev(arg),precision,false).asPowerSeries()).coefficients) };
+  if (name === 'eulerTransform' || name === 'inverseEulerTransform') {
+    const input = runtime.series(ev(arg), precision, false).asPowerSeries();
+    const output = name === 'eulerTransform' ? eulerTransform(input) : inverseEulerTransform(input);
+    return { kind: 'fps', series: new LaurentSeries(runtime.field, output.coefficients) };
+  }
   if (name === 'if') return ev(runtime.condition(ev(arg)) ? args[1]! : args[2]!);
   if (name === 'coeff') return runtime.index(arg, runtime.exactInteger(ev(args[1]!)));
   if (name === 'sqrt') return runtime.squareRoot(arg, precision);

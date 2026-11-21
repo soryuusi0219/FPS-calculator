@@ -69,6 +69,31 @@ test('Euler変換は分割数・既知の積・形式的恒等式と一致し、
   assert.ok(run(['eulerTransform(X)'],{domain:'prime',modulus:'2',terms:3}).rows[0]!.error);
 });
 
+test('Euler逆変換は積の指数を復元し、合成と微分で必要な精度を保つ', () => {
+  const result = values([
+    'P=prod(1,k=>1/(1-X^k))',
+    'inverseEulerTransform(P)',
+    'inverseEulerTransform(1+X)',
+    'inverseEulerTransform(eulerTransform(X/2-X^2))-(X/2-X^2)',
+    'eulerTransform(inverseEulerTransform(exp(X)))-exp(X)',
+    'diff(inverseEulerTransform(P))',
+  ]);
+  assert.deepEqual(result.rows[1]!.coefficients, ['0', '1', '1', '1', '1', '1', '1', '1']);
+  assert.deepEqual(result.rows[2]!.coefficients, ['0', '1', '-1', '0', '0', '0', '0', '0']);
+  for (const i of [3, 4]) assert.deepEqual(result.rows[i]!.coefficients, zeros());
+  assert.deepEqual(result.rows[5]!.coefficients, ['1', '2', '3', '4', '5', '6', '7', '8']);
+});
+
+test('Euler逆変換は最小精度でも定数項を検証し、素数modでは割れる次数まで計算する', () => {
+  assert.deepEqual(values(['inverseEulerTransform(fps(1))'], { terms: 1 }).rows[0]!.coefficients, ['0']);
+  assert.match(run(['inverseEulerTransform(X)'], { terms: 1 }).rows[0]!.error!, /f\(0\)=1/);
+  assert.match(run(['inverseEulerTransform(1)']).rows[0]!.error!, /FPS/);
+  assert.match(run(['inverseEulerTransform(1+1/X)']).rows[0]!.error!, /Laurent/);
+  const mod = { domain: 'prime', modulus: '2' } as const;
+  assert.deepEqual(values(['inverseEulerTransform(1+X)'], { ...mod, terms: 2 }).rows[0]!.coefficients, ['0', '1']);
+  assert.ok(run(['inverseEulerTransform(1+X)'], { ...mod, terms: 3 }).rows[0]!.error);
+});
+
 test('積で次数が下がる微分の再帰を初期値なしで解き、追加精度と小さいmodも保つ',()=>{
   const result=values(['f=1+diff(X*X*f)','f-fps(n=>(n+1)!)','diff(f)-diff(fps(n=>(n+1)!))','f/X-fps(n=>(n+1)!)/X','g=1+diff(g*X^2)','f-g']);
   assert.deepEqual(result.rows[0]!.coefficients,['1','2','6','24','120','720','5040','40320']);
@@ -108,7 +133,7 @@ test('総和・総積と次数範囲のTeX、補助関数・束縛と表示基�
   result.rows.forEach(row=>assert.doesNotThrow(()=>renderToString(row.tex!,{throwOnError:true,trust:false})));
   assert.match(result.rows[0]!.tex!,/\\sum_/);assert.match(result.rows[1]!.tex!,/\\prod_/);assert.match(result.rows[2]!.tex!,/n=1.*\^\{4\}/);
   const egf=values(['sum(1,3,k=>X^k)'],{basis:'egf'});assert.deepEqual(egf.rows[0]!.coefficients,['0','1','2','6','0','0','0','0']);
-  for(const name of ['sum','prod','eulerTransform'])assert.ok(completions(name.slice(0,-1),name.length-1,[]).items.some(item=>item.name===name));
+  for(const name of ['sum','prod','eulerTransform','inverseEulerTransform'])assert.ok(completions(name.slice(0,-1),name.length-1,[]).items.some(item=>item.name===name));
   const input:Calculation={rows:[{id:'f',source:'F=1+X'},{id:'s',source:'sum(1,3,k=>F(X^k))+fps(k=>F[k],1,3)'}],terms:8,domain:'rational',modulus:'17',basis:'ogf'};
   const renamed=renameVariable(input,'F','G');assert.equal(renamed.count,3);assert.equal(renamed.input.rows[1]!.source,'sum(1,3,k=>G(X^k))+fps(k=>G[k],1,3)');
   assert.throws(()=>renameVariable(input,'F','k'),/捕獲/);

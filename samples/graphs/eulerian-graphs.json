@@ -1,0 +1,21 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "F=log(A)",
+        "comment": "連結で全頂点が偶次数のグラフ。単点を含み、n=0は0。先頭は0,1,0,1,3,38,720,…。"
+      },
+      {
+        "source": "A=egf(n=>n==0?1:2^(nCk(n-1,2)))",
+        "comment": "全頂点が偶次数のラベル付き単純グラフ。n>=1で2^binom(n-1,2)。空グラフは1個とし、n=0では負の二項係数引数を評価しません。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

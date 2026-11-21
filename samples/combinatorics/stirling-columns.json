@@ -1,0 +1,33 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "S=(exp(X)-1)^k/k!",
+        "comment": "第2種S(n,k)。k個の空でないラベル付き集合を、順序を区別せず分けます。"
+      },
+      {
+        "source": "k=3",
+        "comment": "固定するブロック数/サイクル数。0以上の小さい整数。"
+      },
+      {
+        "source": "P=(-log(1-X))^k/k!",
+        "comment": "符号なし第1種s(n,k)。置換のサイクル分解のサイクル数がkであるもの。"
+      },
+      {
+        "source": "S-egf(n=>stirling2(n,k))",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      },
+      {
+        "source": "P-egf(n=>stirling1(n,k))",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

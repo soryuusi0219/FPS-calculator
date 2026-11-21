@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "P=prod(1,k=>1/(1-X^k))",
+        "comment": "大きさkの部分を0,1,2,…個選ぶ因子1/(1-X^k)の積です。各次数に寄与する因子は有限個。参考: https://oeis.org/A000041"
+      },
+      {
+        "source": "Q=eulerTransform(X/(1-X))",
+        "comment": "各正のサイズに部品が1種類ずつある場合の多重集合です。必要な整数で割れない小さいmodでは、上の直接の積を使ってください。"
+      },
+      {
+        "source": "P-Q",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 12,
+    "domain": "rational",
+    "basis": "ogf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}

@@ -8,7 +8,7 @@ import { defaultSession, restoreSession, saveSession, STORAGE_KEY } from '../src
 import type { SessionStorage } from '../src/app/session.ts';
 import { CalculationClient } from '../src/app/calculation-client.ts';
 import type { CalculationSnapshot, CalculationWorker } from '../src/app/calculation-client.ts';
-import { resultCopyText, texCopyText } from '../src/ui/result-format.ts';
+import { oeisSearchUrl, resultCopyText, texCopyText } from '../src/ui/result-format.ts';
 
 class MemoryStorage implements SessionStorage {
   readonly values = new Map<string, string>();
@@ -81,6 +81,28 @@ test('最後の行の削除は空行を残し、行数上限を越えて追加�
   while (input.rows.length < MAX_ROWS) assert.ok(model.add('x'));
   assert.equal(model.add('x'), undefined);
   assert.equal(input.rows.length, MAX_ROWS);
+});
+
+test('指定した行の直後へ空行を挿入し、移動後の行順・選択・保存を維持する', () => {
+  const id = ids(), session = defaultSession(id), model = new NotebookModel(session.input, id);
+  const original = [...model.input.rows], anchor = original[0]!;
+  model.move(anchor.id, 1); model.select(original[3]!.id);
+  const before = [...model.input.rows];
+  const inserted = model.add('', anchor.id)!;
+  assert.equal(inserted.source, ''); assert.equal(model.selectedId, inserted.id);
+  assert.deepEqual(model.input.rows, [...before.slice(0, 2), inserted, ...before.slice(2)]);
+  assert.ok(original.every(row => model.input.rows.includes(row)));
+  assert.ok(!original.some(row => row.id === inserted.id));
+  const storage = new MemoryStorage(); saveSession(storage, session);
+  assert.deepEqual(restoreSession(storage, id).session.input.rows.map(row => row.source), model.input.rows.map(row => row.source));
+  const tail = model.add('tail')!;
+  assert.equal(model.input.rows.at(-1), tail, '通常の追加ボタンは末尾へ追加する');
+  const afterTail = model.add('', tail.id)!; assert.equal(model.input.rows.at(-1), afterTail);
+  const snapshot = model.snapshot();
+  assert.equal(model.add('', 'missing'), undefined); assert.deepEqual(model.snapshot(), snapshot);
+  while (model.input.rows.length < MAX_ROWS) model.add();
+  const full = model.snapshot();
+  assert.equal(model.add('', anchor.id), undefined); assert.deepEqual(model.snapshot(), full);
 });
 
 test('複製した式は元の直後に別IDで挿入され、選択・独立した編集・保存復元ができる', () => {
@@ -206,4 +228,14 @@ test('コピー書式は通常FPSの配列とLaurentの最低次数付きJSONを
   assert.deepEqual(JSON.parse(resultCopyText({ ...base, valueType: 'laurent', startDegree: -1 })!), { startDegree: -1, coefficients: ['1', '0'] });
   assert.equal(resultCopyText({ id: 's', name: null, valueType: 'scalar', value: '0' }), '0');
   assert.equal(texCopyText({ ...base, valueType: 'fps' }), 'f=1\n\n1+O(x^2)');
+});
+
+test('OEIS検索には表示中の整数係数を符号・桁・順序ごと渡す', () => {
+  const result = { id: 'f', name: null, valueType: 'laurent' as const, startDegree: -1, coefficients: ['1', '0', '-2', '9007199254740993', '0'] };
+  const url = new URL(oeisSearchUrl(result)!);
+  assert.equal(url.origin + url.pathname, 'https://oeis.org/search');
+  assert.equal(url.searchParams.get('q'), '1,0,-2,9007199254740993,0');
+  assert.equal(oeisSearchUrl({ ...result, coefficients: ['1', '3/2'] }), undefined);
+  assert.equal(oeisSearchUrl({ ...result, error: '計算エラー' }), undefined);
+  assert.equal(oeisSearchUrl({ id: 's', name: null, valueType: 'scalar', value: '2' }), undefined);
 });

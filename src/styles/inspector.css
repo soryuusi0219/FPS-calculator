@@ -7,6 +7,7 @@
 .status.has-error::before { background: #ad593e; }
 .result-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
 .copy-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.copy-actions a { text-decoration: none; }
 .value-type { display: inline-block; font-size: 10px; vertical-align: middle; color: var(--green); background: #e7efe1; padding: 4px 7px; border-radius: 4px; letter-spacing: 0; }
 .value-type:empty { display: none; }
 .expression-math { overflow-x: auto; padding: 0 0 22px; font-size: 15px; }

@@ -1,0 +1,25 @@
+{
+  "format": "fps-calculator",
+  "version": 1,
+  "data": {
+    "rows": [
+      {
+        "source": "A=egf(n=>2^(nCk(n,2)))",
+        "comment": "各頂点対の辺の有無を独立に選ぶので個数は2^binom(n,2)。空グラフは1個。出典: https://maspypy.com/グラフ数え上げ 。ループ・多重辺なし。期待値と符号は組合せ分解・既知項でも照合しています。"
+      },
+      {
+        "source": "L=log(A)",
+        "comment": "全グラフは非空の連結グラフの集合なのでA=exp(L)。連結グラフのn=0は0、単点は1個です。"
+      },
+      {
+        "source": "exp(L)-A",
+        "comment": "指定精度で差が0になることを確認します。有限の係数一致だけを恒等性の証明とはしません。"
+      }
+    ],
+    "terms": 8,
+    "domain": "rational",
+    "basis": "egf",
+    "modulus": "998244353"
+  },
+  "view": "table"
+}
